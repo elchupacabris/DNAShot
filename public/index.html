@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNA Shot – Entrar / Crear Cuenta</title>
+
+  <!-- Fuentes de Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <!-- Tu CSS externo -->
+  <link rel="stylesheet" href="/css/login.css">
+
+  <!-- Firebase SDKs (compat version) -->
+  <!-- Nota: Estos se cargan en el head porque los necesitamos para la inicialización y el script de login/signup -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="/images/logo.png" alt="DNA Shot Logo" class="logo" />
+
+    <!-- ===== LOGIN SECTION ===== -->
+    <div class="form-section" id="login-section">
+      <h2>Entrar</h2>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" class="style3" placeholder="tu@correo.com" />
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" class="style3" />
+      <button id="login-btn" class="style3">Entrar</button>
+      <div class="msg" id="login-msg"></div>
+      <div class="toggle-link" id="show-signup">¿No tienes cuenta? Crear Cuenta</div>
+    </div>
+
+    <!-- ===== SIGNUP SECTION ===== -->
+    <div class="form-section" id="signup-section" style="display: none;">
+      <h2>Crear Cuenta</h2>
+      <label for="signup-email">Email</label>
+      <input type="email" id="signup-email" class="style3" placeholder="tu@correo.com" />
+      <label for="signup-password">Contraseña</label>
+      <input type="password" id="signup-password" class="style3" />
+      <button id="signup-btn" class="style3">Crear Cuenta</button>
+      <div class="msg" id="signup-msg"></div>
+      <div class="toggle-link" id="show-login">¿Ya tienes cuenta? Entrar</div>
+    </div>
+  </div>
+
+  <!-- Tu JavaScript externo -->
+  <script src="/js/login.js"></script>
+</body>
+</html>

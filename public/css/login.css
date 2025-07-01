@@ -1,0 +1,104 @@
+/* ----------------------------------------
+   Global & Body
+---------------------------------------- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  /* Ruta de la imagen ajustada */
+  background: url('/images/golfbg.png') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* ----------------------------------------
+   Container & Logo
+---------------------------------------- */
+.container {
+  background: rgba(255, 255, 255, 0.273);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  max-width: 90vw;
+  text-align: center;
+}
+img.logo {
+  width: 175px;
+  margin-bottom: 12px;
+}
+
+/* ----------------------------------------
+   Form Sections
+---------------------------------------- */
+.form-section {
+  margin-bottom: 24px;
+}
+.form-section h2 {
+  margin: 0 0 8px;
+  color: #225a2b;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+label {
+  display: block;
+  margin: 6px 0 4px;
+  font-size: 1rem;
+  color: #225a2b;
+  font-weight: 400;
+}
+
+/* ----------------------------------------
+   3D-Style Inputs & Buttons
+---------------------------------------- */
+.style3 {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 4px auto;
+  border: 2px outset #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background: #f9f9f9;
+}
+button.style3 {
+  width: 100%;
+  padding: 10px;
+  margin: 12px auto 0;
+  background: #2a5f2a;
+  color: #fff;
+  border: 2px outset #2a5f2a;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: block;
+}
+button.style3:active {
+  border-style: inset;
+}
+
+/* ----------------------------------------
+   Toggle Links
+---------------------------------------- */
+.toggle-link {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #225a2b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ----------------------------------------
+   Error/Info Messages
+---------------------------------------- */
+.msg {
+  margin-top: 8px;
+  color: #e63946;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
