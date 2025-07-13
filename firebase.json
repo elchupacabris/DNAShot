@@ -6,5 +6,25 @@
       "**/.*",
       "**/node_modules/**"
     ]
+    // you can add rewrite rules here if you want “clean” URLs:
+    // "rewrites": [{"source": "/rounds", "destination": "/rounds.html"}]
   }
+}
+,
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
 }

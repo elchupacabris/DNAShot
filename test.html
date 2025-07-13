@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNA Shot – Entrar / Crear Cuenta</title>
+
+  <!-- Firebase (compat version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- Font & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ----------------------------------------
+       Global & Body
+    ---------------------------------------- */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: url('./images/golfbg.png') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* ----------------------------------------
+       Container & Logo
+    ---------------------------------------- */
+    .container {
+      background: rgba(255, 255, 255, 0.273);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      max-width: 90vw;
+      text-align: center;
+    }
+    img.logo {
+      width: 175px;
+      margin-bottom: 12px;
+    }
+
+    /* ----------------------------------------
+       Form Sections
+    ---------------------------------------- */
+    .form-section {
+      margin-bottom: 24px;
+    }
+    .form-section h2 {
+      margin: 0 0 8px;
+      color: #225a2b;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    label {
+      display: block;
+      margin: 6px 0 4px;
+      font-size: 1rem;
+      color: #225a2b;
+      font-weight: 400;
+    }
+
+    /* ----------------------------------------
+       3D-Style Inputs & Buttons
+    ---------------------------------------- */
+    .style3 {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 4px auto;
+      border: 2px outset #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      background: #f9f9f9;
+    }
+    button.style3 {
+      width: 100%;
+      padding: 10px;
+      margin: 12px auto 0;
+      background: #2a5f2a;
+      color: #fff;
+      border: 2px outset #2a5f2a;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: block;
+    }
+    button.style3:active {
+      border-style: inset;
+    }
+
+    /* ----------------------------------------
+       Toggle Links
+    ---------------------------------------- */
+    .toggle-link {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #225a2b;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* ----------------------------------------
+       Error/Info Messages
+    ---------------------------------------- */
+    .msg {
+      margin-top: 8px;
+      color: #e63946;
+      font-size: 0.9rem;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img src="./images/logo.png" alt="DNA Shot Logo" class="logo" />
+
+    <!-- ===== LOGIN SECTION ===== -->
+    <div class="form-section" id="login-section">
+      <h2>Entrar</h2>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" class="style3" placeholder="tu@correo.com" />
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" class="style3" />
+      <button id="login-btn" class="style3">Entrar</button>
+      <div class="msg" id="login-msg"></div>
+      <div class="toggle-link" id="show-signup">¿No tienes cuenta? Crear Cuenta</div>
+    </div>
+
+    <!-- ===== SIGNUP SECTION ===== -->
+    <div class="form-section" id="signup-section" style="display: none;">
+      <h2>Crear Cuenta</h2>
+      <label for="signup-email">Email</label>
+      <input type="email" id="signup-email" class="style3" placeholder="tu@correo.com" />
+      <label for="signup-password">Contraseña</label>
+      <input type="password" id="signup-password" class="style3" />
+      <button id="signup-btn" class="style3">Crear Cuenta</button>
+      <div class="msg" id="signup-msg"></div>
+      <div class="toggle-link" id="show-login">¿Ya tienes cuenta? Entrar</div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------
+    // Initialize Firebase
+    // ------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyBkeimnGI9VE6yrbFRkUHkuTe4fQYiVfRU",
+      authDomain: "golf-scorecard-1847c.firebaseapp.com",
+      projectId: "golf-scorecard-1847c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ------------------------------
+    // Toggle Logic (Login <--> Signup)
+    // ------------------------------
+    const loginSection = document.getElementById('login-section');
+    const signupSection = document.getElementById('signup-section');
+    document.getElementById('show-signup').addEventListener('click', () => {
+      loginSection.style.display = 'none';
+      signupSection.style.display = 'block';
+      document.getElementById('login-msg').textContent = '';
+    });
+    document.getElementById('show-login').addEventListener('click', () => {
+      signupSection.style.display = 'none';
+      loginSection.style.display = 'block';
+      document.getElementById('signup-msg').textContent = '';
+    });
+
+    // ------------------------------
+    // LOGIN
+    // ------------------------------
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      msg.textContent = '';
+
+      try {
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        const uid = cred.user.uid;
+
+        // Verifica si existe el perfil en Firestore dentro de "users/{uid}"
+        const userDocRef = db.collection('users').doc(uid);
+        const userDoc = await userDocRef.get();
+
+        if (userDoc.exists && userDoc.data().nombre) {
+          // Perfil ya creado: redirige a HOME.html
+          window.location.href = 'HOME.html';
+        } else {
+          // No existe 'nombre' en perfil: va a player-details.html
+          window.location.href = 'player-details.html';
+        }
+      } catch (err) {
+        msg.textContent = 'Email o contraseña incorrectos.';
+      }
+    });
+
+    // ------------------------------
+    // SIGNUP
+    // ------------------------------
+    document.getElementById('signup-btn').addEventListener('click', async () => {
+      const email = document.getElementById('signup-email').value.trim().toLowerCase();
+      const password = document.getElementById('signup-password').value;
+      const msg = document.getElementById('signup-msg');
+      msg.textContent = '';
+
+      try {
+        const userCred = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCred.user.uid;
+
+        // Crea perfil mínimo en Firestore (sin 'nombre' aún)
+        await db.collection('users').doc(uid).set({
+          email,
+          createdAt: new Date().toISOString()
+        });
+
+        msg.style.color = '#225a2b';
+        msg.textContent = 'Cuenta creada. Ahora inicia sesión.';
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

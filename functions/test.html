@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Golfmetrics Pro Dashboard · DNA Shot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --primary: #246a2e;
+      --accent: #8be27f;
+      --bg: #f3f7f3;
+      --card-bg: #fff;
+      --text: #234223;
+      --muted: #aacba1;
+      --shadow: 0 8px 24px rgba(41,56,31,0.13);
+      --danger: #ef5350;
+      --success: #4caf50;
+      --gold: #ffd700;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: url('https://images.unsplash.com/photo-1593111774240-d529f12e5e9e?q=80&w=2070') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+    }
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* SIDEBAR */
+    .sidebar {
+      width: 210px;
+      background: rgba(36,106,46,0.97);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: sticky; left: 0; top: 0; z-index: 99;
+    }
+    .sidebar .logo {
+      width: 80px; margin: 32px auto 10px auto; display: block;
+    }
+    .sidebar nav {
+      display: flex; flex-direction: column; width: 100%;
+      margin-top: 40px;
+    }
+    .sidebar nav button {
+      background: none; border: none;
+      color: #fff;
+      text-align: left;
+      font-size: 1.09rem;
+      padding: 15px 24px;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+      border-left: 4px solid transparent;
+      transition: all 0.23s;
+      outline: none;
+    }
+    .sidebar nav button.active, .sidebar nav button:hover {
+      background: rgba(139,226,127,0.09);
+      color: var(--accent);
+      border-left: 4px solid var(--accent);
+    }
+    .sidebar .toggle-mode {
+      margin-top: auto;
+      margin-bottom: 35px;
+      background: none; border: none; color: var(--accent);
+      font-size: 1.09rem; cursor: pointer; font-family: inherit;
+      transition: color 0.2s;
+    }
+    /* MAIN CONTENT */
+    .main-content {
+      flex: 1;
+      padding: 35px 3vw;
+      background: rgba(255,255,255,0.94);
+      min-height: 100vh;
+      box-shadow: var(--shadow);
+    }
+    .player-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+    }
+    .avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: linear-gradient(135deg,var(--accent),#2e8b57 60%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem; color: #fff;
+      font-weight: 700;
+      box-shadow: 0 2px 10px #0001;
+    }
+    .player-header .info {
+      flex: 1;
+    }
+    .player-header h1 { margin: 0; font-size: 2.1rem; color: var(--primary);}
+    .player-header p { margin: 4px 0 0 0; color: #345d38; font-weight: 600;}
+    /* METRIC CARDS */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 22px;
+      margin-bottom: 35px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 23px 18px 15px 18px;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; align-items: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 110px;
+    }
+    .metric-card .title {
+      font-size: 1.03rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 7px;
+    }
+    .metric-card .value {
+      font-size: 2.1rem; font-weight: 800;
+      margin-bottom: 5px; color: var(--accent);
+      animation: countup 1.2s;
+    }
+    @keyframes countup { from {opacity:0;transform:translateY(20px);} to {opacity:1;transform:translateY(0);} }
+    .metric-card .trend {
+      font-size: 1rem;
+      color: var(--success);
+      display: flex; align-items: center; gap: 4px;
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+    .metric-card .trend.down { color: var(--danger);}
+    /* SCORECARDS TABLE */
+    .table-section { margin: 38px 0 25px 0; }
+    .table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .table-header .filters { display: flex; gap: 13px; }
+    .table-header input, .table-header select {
+      padding: 6px 11px;
+      border-radius: 6px; border: 1px solid #c9d6ce;
+      font-size: 0.97rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 12px #0001;
+      overflow-x: auto;
+    }
+    th, td {
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e0eee4;
+    }
+    th { background: var(--primary); color: #fff; }
+    tr:last-child td { border-bottom: none;}
+    tr:hover { background: #f6fff6;}
+    /* CHART */
+    .chart-box {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 30px 10px 10px 10px;
+      margin-bottom: 35px;
+    }
+    /* FOOTER */
+    footer {
+      background: rgba(36,106,46,0.97);
+      color: #fff; text-align: center;
+      font-size: 1rem; padding: 15px 0 8px 0;
+      margin-top: 55px;
+      border-top: 1.5px solid #8be27f55;
+    }
+    @media (max-width: 900px) {
+      .dashboard-layout { flex-direction: column;}
+      .sidebar { width: 100%; flex-direction: row; justify-content: space-between; padding: 0 10px;}
+      .main-content { padding: 17px 5vw; }
+      .metrics-row { grid-template-columns: 1fr 1fr;}
+    }
+    @media (max-width:600px) {
+      .main-content { padding: 7px 1vw;}
+      .metrics-row { grid-template-columns: 1fr;}
+      .sidebar { flex-direction: row; height: 74px; }
+      .sidebar nav { flex-direction: row; margin-top: 10px;}
+      .sidebar nav button { padding: 13px 10px;}
+      .sidebar .logo { width: 50px; margin: 12px;}
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <img class="logo" src="public/images/logo.png" alt="DNA Shot Logo" />
+    <nav>
+      <button class="active" data-section="overview"><i class="fas fa-home"></i> Overview</button>
+      <button data-section="scorecards"><i class="fas fa-list"></i> Scorecards</button>
+      <button data-section="stats"><i class="fas fa-chart-bar"></i> Advanced Stats</button>
+      <button data-section="compare"><i class="fas fa-trophy"></i> Leaderboard</button>
+      <button data-section="settings"><i class="fas fa-cog"></i> Ajustes</button>
+    </nav>
+    <button class="toggle-mode" id="toggleMode"><i class="fas fa-moon"></i> Oscuro</button>
+  </aside>
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="player-header">
+      <div class="avatar" id="avatar">ML</div>
+      <div class="info">
+        <h1 id="playerName">Miguel López</h1>
+        <p id="playerHandicap">Handicap: 15.4 &nbsp;|&nbsp; Last Score: 92</p>
+      </div>
+    </div>
+    <!-- OVERVIEW -->
+    <section id="overview-section">
+      <div class="metrics-row" id="metricsRow">
+        <!-- Metric cards injected by JS -->
+      </div>
+      <div class="chart-box">
+        <canvas id="scoreTrend" height="100"></canvas>
+      </div>
+    </section>
+    <!-- SCORECARDS -->
+    <section id="scorecards-section" style="display:none;">
+      <div class="table-section">
+        <div class="table-header">
+          <strong>Scorecards</strong>
+          <div class="filters">
+            <input type="date" id="filterDate" />
+            <select id="filterCourse"></select>
+            <button id="clearFilters" style="padding:6px 15px;">Limpiar</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Campo</th><th>Score</th><th>Putts</th><th>FIR%</th><th>GIR%</th><th>DD Avg</th><th>ESC</th>
+            </tr>
+          </thead>
+          <tbody id="scorecardTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- ADVANCED STATS -->
+    <section id="stats-section" style="display:none;">
+      <div class="metrics-row" id="advancedMetrics">
+        <!-- More advanced metrics injected here -->
+      </div>
+      <div class="chart-box">
+        <canvas id="radarStats" height="120"></canvas>
+      </div>
+    </section>
+    <!-- LEADERBOARD -->
+    <section id="compare-section" style="display:none;">
+      <div class="table-section">
+        <strong>Leaderboard</strong>
+        <table>
+          <thead>
+            <tr><th>Jugador</th><th>Handicap</th><th>AVG Score</th><th>Rondas</th><th>Mejor Score</th></tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- SETTINGS -->
+    <section id="settings-section" style="display:none;">
+      <h2>Próximamente: Personaliza tu Dashboard</h2>
+    </section>
+  </div>
+</div>
+<footer>
+  Golfmetrics Pro Dashboard &copy; DNA Shot · 2025
+  <br>
+  <span id="dataUpdated"></span>
+</footer>
+<script>
+  // ==== Firebase Init ====
+  const firebaseConfig = {
+    apiKey: "AIzaSyBkeimnGI9VE6yrbFRkUHkuTe4fQYiVfRU",
+    authDomain: "golf-scorecard-1847c.firebaseapp.com",
+    projectId: "golf-scorecard-1847c"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ==== UI Navigation ====
+  const navBtns = document.querySelectorAll('.sidebar nav button');
+  navBtns.forEach(btn => {
+    btn.onclick = function() {
+      navBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const sections = ['overview-section','scorecards-section','stats-section','compare-section','settings-section'];
+      sections.forEach(id => document.getElementById(id).style.display='none');
+      document.getElementById(this.dataset.section+'-section').style.display='';
+    }
+  });
+  // Theme Toggle
+  const toggleMode = document.getElementById('toggleMode');
+  toggleMode.onclick = () => {
+    document.body.classList.toggle('dark');
+    if(document.body.classList.contains('dark')) {
+      document.documentElement.style.setProperty('--card-bg','#262e2a');
+      document.documentElement.style.setProperty('--bg','#17221a');
+      document.documentElement.style.setProperty('--text','#e3fbe9');
+      document.documentElement.style.setProperty('--primary','#8be27f');
+      toggleMode.innerHTML = `<i class="fas fa-sun"></i> Claro`;
+    } else {
+      document.documentElement.style.setProperty('--card-bg','#fff');
+      document.documentElement.style.setProperty('--bg','#f3f7f3');
+      document.documentElement.style.setProperty('--text','#234223');
+      document.documentElement.style.setProperty('--primary','#246a2e');
+      toggleMode.innerHTML = `<i class="fas fa-moon"></i> Oscuro`;
+    }
+  };
+
+  // ==== DATA LOAD ====
+  const PLAYER = "Miguel López";
+  // Utility to animate number
+  function animateNumber(el, value, decimals=1) {
+    let i = 0, start = 0, end = parseFloat(value);
+    const step = () => {
+      if (i < 20) {
+        el.textContent = (start + (end-start)*(i/20)).toFixed(decimals);
+        i++;
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = end.toFixed(decimals);
+      }
+    }; step();
+  }
+  // OVERVIEW DATA
+  async function loadOverview() {
+    // You can adapt Firestore queries as needed
+    const perfDoc = await db.collection('performance').doc(PLAYER).get();
+    const perf = perfDoc.exists ? perfDoc.data() : {
+      index: 14.8, avgScore: 90.5, firPct: 52, girPct: 34, ddAvg: 235, esc: 13.2, putts: 32.0,
+      bestScore: 78, lastScore: 91
+    };
+    document.getElementById('playerName').textContent = PLAYER;
+    document.getElementById('avatar').textContent = PLAYER.split(' ').map(x=>x[0]).join('');
+    document.getElementById('playerHandicap').innerHTML = `Handicap: <span style="color:var(--gold);font-weight:bold">${perf.index}</span> &nbsp;|&nbsp; Last Score: <span style="color:var(--success);font-weight:bold">${perf.lastScore}</span>`;
+
+    // Metric Cards
+    const metrics = [
+      {title:'Handicap', value:perf.index, icon:'fa-chart-line', trend:+0.3},
+      {title:'AVG Score', value:perf.avgScore, icon:'fa-flag', trend:-1

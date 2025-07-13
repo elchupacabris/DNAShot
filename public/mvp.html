@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard de Rendimiento de Golf</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif; /* Usando Inter para una mejor legibilidad */
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a2e38, #1a3a4a);
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px; /* Aumentado para acomodar más contenido */
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(0, 30, 20, 0.6);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #4ade80, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 800;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #a3e635;
+      max-width: 700px;
+      margin: 0 auto 15px;
+    }
+
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 30px;
+      justify-content: center; /* Centrar contenido */
+    }
+
+    .visualization-container, .heatmap-container {
+      flex: 1; /* Permitir que los contenedores se expandan */
+      min-width: 450px; /* Ajustar ancho mínimo para evitar desbordamientos en pantallas pequeñas */
+      background: rgba(0, 30, 20, 0.6);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .panel-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+      font-size: 1.8rem;
+      color: #4ade80;
+      margin-bottom: 10px;
+    }
+
+    #green-photo {
+      width: 100%;
+      max-height: 500px;
+      object-fit: cover;
+      filter: brightness(0.9);
+      border-radius: 12px;
+      display: block;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      right: 25px;
+      bottom: 25px;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin: 25px 0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .legend-color {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .performance-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .distance-stat {
+      color: #4ade80;
+    }
+
+    .average-stat {
+      color: #facc15;
+    }
+
+    .best-stat {
+      color: #3b82f6;
+    }
+
+    .worst-stat {
+      color: #ef4444;
+    }
+
+    .stat-label {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    .hole-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .hole-item {
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hole-item:hover {
+      transform: scale(1.05);
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    .hole-number {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4ade80;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hole-distance {
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 500;
+      position: relative;
+      z-index: 2;
+    }
+
+    .performance-category {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      opacity: 0.8;
+      position: relative;
+      z-index: 2;
+    }
+
+    .distance-legend-container {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .distance-legend-container h3 {
+      color: #a3e635;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .distance-legend {
+      list-style: none;
+      padding-left: 10px;
+    }
+
+    .distance-legend li {
+      color: #ffffff;
+      margin: 4px 0;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      padding: 5px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .distance-legend li:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-top: 20px;
+      background: rgba(0, 30, 20, 0.6);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .footer a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .instructions {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+
+    /* Estilos específicos para el mapa de calor */
+    #putt-heatmap-canvas {
+      width: 100%;
+      height: 300px; /* Altura fija para el canvas del mapa de calor */
+      background-color: #0d3d4b;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .heatmap-legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+
+    .heatmap-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .heatmap-color-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .visualization-container, .heatmap-container {
+        min-width: unset; /* Permitir que ocupe todo el ancho disponible */
+        width: 100%;
+      }
+
+      #green-photo,
+      #overlay {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-golf-ball"></i> Dashboard de Rendimiento de Golf</h1>
+      <p class="subtitle">
+        Análisis visual de tu juego de golf en el green y en el campo.
+      </p>
+    </header>
+
+    <div class="content">
+      <div class="visualization-container">
+        <div class="panel-header">
+          <h2><i class="fas fa-bullseye"></i> Contorno del Green + Superposición de Pendiente</h2>
+        </div>
+
+        <!-- 1) Imagen subyacente del green -->
+        <img
+          id="green-photo"
+          src="https://placehold.co/800x500/004d00/ffffff?text=Putting+Green+Photo"
+          alt="Foto del Green de Putt"
+          onerror="this.onerror=null; this.src='https://placehold.co/800x500/004d00/ffffff?text=Putting+Green+Photo';"
+        />
+
+        <!-- 2) Canvas transparente encima -->
+        <canvas id="overlay"></canvas>
+
+        <!-- 3) Leyenda de bandas de color -->
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #3b82f6;"></div>
+            <span>0–6 pies (Azul)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4ade80;"></div>
+            <span>6–11 pies (Verde)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #facc15;"></div>
+            <span>11–15 pies (Amarillo)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #fb923c;"></div>
+            <span>15–20 pies (Naranja)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #ef4444;"></div>
+            <span>20–25 pies (Rojo)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <h2><i class="fas fa-chart-bar"></i> Resumen de Rendimiento</h2>
+
+        <div class="performance-stats">
+          <div class="stat-card">
+            <div class="stat-label">Putt Más Corto</div>
+            <div class="stat-value distance-stat" id="shortest-putt">2 ft</div>
+            <div class="stat-label" id="shortest-putt-hole">Hoyo #5</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Putt Más Largo</div>
+            <div class="stat-value distance-stat" id="longest-putt">22 ft</div>
+            <div class="stat-label" id="longest-putt-hole">Hoyo #11</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Distancia Promedio</div>
+            <div class="stat-value average-stat" id="average-putt">8.9 ft</div>
+            <div class="stat-label">En todos los hoyos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mejor Rendimiento</div>
+            <div class="stat-value best-stat" id="best-performance-count">5 hoyos</div>
+            <div class="stat-label">≤ 5 pies</div>
+          </div>
+        </div>
+
+        <h2 style="margin-top: 25px;"><i class="fas fa-flag"></i> Distancias de Hoyo</h2>
+        <div class="hole-list">
+          <!-- Poblado por JavaScript -->
+        </div>
+
+        <div class="instructions">
+          <p>
+            <i class="fas fa-info-circle"></i> Pasa el ratón o haz clic en un hoyo a continuación para resaltar su posición. Las bandas de color muestran zonas de contorno (azul cerca del centro → verde → amarillo → naranja → rojo). Pequeñas flechas muestran la dirección de la pendiente cuesta abajo en ese punto.
+          </p>
+        </div>
+      </div>
+
+      <!-- Nuevo contenedor para el mapa de calor de putts -->
+      <div class="heatmap-container">
+        <div class="panel-header">
+          <h2><i class="fas fa-map-marked-alt"></i> Mapa de Calor de los 18 Primeros Putts</h2>
+        </div>
+        <canvas id="putt-heatmap-canvas"></canvas>
+        <div class="heatmap-legend">
+          <div class="heatmap-legend-item">
+            <div class="heatmap-color-box" style="background-color: #4ade80;"></div>
+            <span>Putts Cortos (Mejor)</span>
+          </div>
+          <div class="heatmap-legend-item">
+            <div class="heatmap-color-box" style="background-color: #facc15;"></div>
+            <span>Putts Medios</span>
+          </div>
+          <div class="heatmap-legend-item">
+            <div class="heatmap-color-box" style="background-color: #ef4444;"></div>
+            <span>Putts Largos (Peor)</span>
+          </div>
+        </div>
+        <div class="instructions">
+          <p>
+            <i class="fas fa-info-circle"></i> Este mapa de calor muestra la distancia de tu primer putt para cada hoyo. Los colores más verdes indican putts más cortos, mientras que los colores más rojos indican putts más largos.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dashboard de Análisis de Rendimiento de Golf | Superposición de Contorno + Pendiente</p>
+      <p>
+        Desarrollado con <a href="https://livechatai.com/" target="_blank">LiveChatAI</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // ---------- DATOS ----------
+      // Datos de los hoyos: [número de hoyo, distancia en pies]
+      const holes = [
+        [1, 3],
+        [2, 5],
+        [3, 6],
+        [4, 11],
+        [5, 2],
+        [6, 21],
+        [7, 14],
+        [8, 9],
+        [9, 11],
+        [10, 12],
+        [11, 22],
+        [12, 3],
+        [13, 15],
+        [14, 8],
+        [15, 9],
+        [16, 5],
+        [17, 3],
+        [18, 8],
+      ];
+
+      const photo = document.getElementById('green-photo');
+      const canvas = document.getElementById('overlay');
+      const ctx = canvas.getContext('2d');
+      const holeList = document.querySelector('.hole-list');
+
+      // Elementos para las estadísticas de rendimiento
+      const shortestPuttEl = document.getElementById('shortest-putt');
+      const shortestPuttHoleEl = document.getElementById('shortest-putt-hole');
+      const longestPuttEl = document.getElementById('longest-putt');
+      const longestPuttHoleEl = document.getElementById('longest-putt-hole');
+      const averagePuttEl = document.getElementById('average-putt');
+      const bestPerformanceCountEl = document.getElementById('best-performance-count');
+
+      // ---------- FUNCIONES AUXILIARES PARA EL GREEN DE PUTT ----------
+
+      // Redimensionar el canvas para que coincida con el tamaño mostrado de la imagen
+      function resizeCanvas() {
+        const rect = photo.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+
+      // Una función de pseudo-elevación simple (suma de gaussianas) para demostración
+      // Devuelve la "altura" en unidades arbitrarias [0..1]
+      function elevation(u, v) {
+        // Normalizar (u,v) al rango [-1..1] con centro (0,0)
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const x = (u - cx) / (cx);
+        const y = (v - cy) / (cy);
+
+        // Tres gaussianas para simular "colinas" en el green
+        const hill1 = Math.exp(-((x - 0.3) ** 2 + (y + 0.2) ** 2) / 0.1);
+        const hill2 = Math.exp(-((x + 0.4) ** 2 + (y - 0.3) ** 2) / 0.08);
+        const hill3 = Math.exp(-((x + 0.1) ** 2 + (y + 0.5) ** 2) / 0.15);
+        // Combinar y limitar
+        return Math.min(1, hill1 + hill2 + hill3);
+      }
+
+      // Convertir la elevación [0..1] a una "distancia en pies" [0..25]
+      function distanceFeet(u, v) {
+        return elevation(u, v) * 25;
+      }
+
+      // Dada una "distancia (0..25 pies)", seleccionar una banda de color:
+      // 0–6 pies (azul), 6–11 (verde), 11–15 (amarillo), 15–20 (naranja), 20–25 (rojo)
+      function getBandColor(dist) {
+        if (dist <= 6) return '#3b82f6';
+        if (dist <= 11) return '#4ade80';
+        if (dist <= 15) return '#facc15';
+        if (dist <= 20) return '#fb923c';
+        return '#ef4444';
+      }
+
+      // Dibujar las bandas de contorno elípticas recortadas a la foto
+      function drawContours() {
+        const cw = canvas.width,
+          ch = canvas.height;
+        const cx = cw / 2,
+          cy = ch / 2;
+        // Radios de la elipse (más ancha horizontalmente)
+        const rx = Math.min(cx, cy) * 0.95;
+        const ry = Math.min(cx, cy) * 0.65;
+
+        // Dibujar cada píxel (paso de 4px para rendimiento) y rellenar con el color de la banda
+        const step = 4;
+        for (let j = 0; j < ch; j += step) {
+          for (let i = 0; i < cw; i += step) {
+            // Comprobar si el punto (i,j) está dentro de la elipse
+            const dx = (i - cx) / rx;
+            const dy = (j - cy) / ry;
+            if (dx * dx + dy * dy <= 1) {
+              const d = distanceFeet(i, j); // 0..25
+              ctx.fillStyle = getBandColor(d);
+              ctx.fillRect(i, j, step, step);
+            }
+          }
+        }
+
+        // Dibujar contornos negros delgados alrededor de cada límite de banda:
+        // Encontrar límites aproximados muestreando a lo largo de las direcciones de la elipse
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.lineWidth = 1;
+        [6, 11, 15, 20, 25].forEach((distTarget) => {
+          ctx.beginPath();
+          // Recorrer los 360° para trazar el límite
+          for (let deg = 0; deg <= 360; deg += 2) {
+            const rad = (deg * Math.PI) / 180;
+            // Búsqueda binaria a lo largo del rayo para encontrar el punto cuya distanceFeet ≈ distTarget
+            let lo = 0,
+              hi = 1;
+            for (let k = 0; k < 20; k++) {
+              const mid = (lo + hi) / 2;
+              const x = cx + rx * mid * Math.cos(rad),
+                y = cy + ry * mid * Math.sin(rad);
+              const d = distanceFeet(x, y);
+              if (d > distTarget) hi = mid;
+              else lo = mid;
+            }
+            const x = cx + rx * lo * Math.cos(rad),
+              y = cy + ry * lo * Math.sin(rad);
+            if (deg === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        });
+      }
+
+      // Dibujar pequeñas flechas que indican la dirección cuesta abajo (gradiente negativo) en los puntos de la cuadrícula
+      function drawSlopeArrows() {
+        const cw = canvas.width,
+          ch = canvas.height;
+        const cx = cw / 2,
+          cy = ch / 2;
+        const rx = Math.min(cx, cy) * 0.95;
+        const ry = Math.min(cx, cy) * 0.65;
+
+        const arrowStep = 30; // Espaciado entre las flechas de la cuadrícula
+        for (let j = arrowStep / 2; j < ch; j += arrowStep) {
+          for (let i = arrowStep / 2; i < cw; i += arrowStep) {
+            // Solo dibujar si (i,j) está dentro de la elipse
+            const dx = (i - cx) / rx,
+              dy = (j - cy) / ry;
+            if (dx * dx + dy * dy <= 1) {
+              // Aproximar el gradiente muestreando un pequeño desplazamiento
+              const h = distanceFeet(i, j);
+              const eps = 2; // Desplazamiento
+              // Muestrear alrededor para estimar derivadas parciales
+              const hx = distanceFeet(i + eps, j);
+              const hy = distanceFeet(i, j + eps);
+              // Vector gradiente: (dh/dx, dh/dy). Cuesta abajo → gradiente negativo
+              let gradX = hx - h;
+              let gradY = hy - h;
+              // Normalizar a longitud 1
+              const mag = Math.hypot(gradX, gradY) || 1;
+              gradX /= mag;
+              gradY /= mag;
+
+              // Dibujar una flecha en la dirección cuesta abajo:
+              const arrowLen = 10;
+              const endX = i - gradX * arrowLen;
+              const endY = j - gradY * arrowLen;
+
+              ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+              ctx.fillStyle = 'rgba(0,0,0,0.6)';
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.moveTo(i, j);
+              ctx.lineTo(endX, endY);
+              ctx.stroke();
+
+              // Dibujar punta de flecha (pequeño triángulo)
+              const baseX = endX + (gradY) * 3;
+              const baseY = endY + (-gradX) * 3;
+              const tipX = endX - gradX * 4;
+              const tipY = endY - gradY * 4;
+              const base2X = endX + (-gradY) * 3;
+              const base2Y = endY + (gradX) * 3;
+
+              ctx.beginPath();
+              ctx.moveTo(tipX, tipY);
+              ctx.lineTo(baseX, baseY);
+              ctx.lineTo(base2X, base2Y);
+              ctx.closePath();
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      // Una textura de pelota de golf 3D (como antes)
+      function createGolfBallTexture(radius) {
+        const textureCanvas = document.createElement('canvas');
+        textureCanvas.width = radius * 2;
+        textureCanvas.height = radius * 2;
+        const texCtx = textureCanvas.getContext('2d');
+
+        // Gradiente de esfera base
+        const grad = texCtx.createRadialGradient(
+          radius,
+          radius,
+          0,
+          radius,
+          radius,
+          radius
+        );
+        grad.addColorStop(0, '#f8f9fa');
+        grad.addColorStop(1, '#e9ecef');
+        texCtx.beginPath();
+        texCtx.arc(radius, radius, radius, 0, Math.PI * 2);
+        texCtx.fillStyle = grad;
+        texCtx.fill();
+
+        // Pequeño resaltado especular
+        texCtx.beginPath();
+        const hl = radius * 0.25;
+        texCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        texCtx.arc(radius - hl, radius - hl / 2, hl, 0, Math.PI * 2);
+        texCtx.fill();
+
+        // Hoyuelos
+        texCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        const dimpleCount = Math.min(30, radius * 2);
+        const dimpleR = radius * 0.1;
+        for (let i = 0; i < dimpleCount; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = Math.random() * (radius - dimpleR * 2);
+          const x = radius + Math.cos(angle) * dist;
+          const y = radius + Math.sin(angle) * dist;
+          texCtx.beginPath();
+          texCtx.arc(x, y, dimpleR, 0, Math.PI * 2);
+          texCtx.fill();
+        }
+
+        return textureCanvas;
+      }
+
+      // Dibujar una pelota de golf en (x,y); resaltar si está en hover
+      function drawGolfBall(x, y, number, radius, highlight = false) {
+        const r = radius || 12;
+        const texture = createGolfBallTexture(r);
+
+        if (highlight) {
+          ctx.save();
+          ctx.shadowColor = 'rgba(255,255,255,0.6)';
+          ctx.shadowBlur = 8;
+          ctx.drawImage(texture, x - r, y - r, r * 2, r * 2);
+          ctx.restore();
+        } else {
+          ctx.drawImage(texture, x - r, y - r, r * 2, r * 2);
+        }
+
+        // Contorno
+        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Número
+        ctx.fillStyle = '#000000';
+        ctx.font = `bold ${r * 0.7}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(number, x, y);
+      }
+
+      // Colocar los hoyos en la elipse, igual que antes
+      function drawHoles(highlightedHole = null) {
+        const cw = canvas.width,
+          ch = canvas.height;
+        const cx = cw / 2,
+          cy = ch / 2;
+        const rx = Math.min(cx, cy) * 0.95;
+        const ry = Math.min(cx, cy) * 0.65;
+
+        holes.forEach(([number, distance]) => {
+          // Ajustar el ángulo base para distribuir los hoyos de manera más uniforme en la elipse
+          // El 'offset' añade una pequeña aleatoriedad para evitar que se superpongan exactamente
+          const baseAngle = (number - 1) * (360 / holes.length);
+          const offset = (Math.random() - 0.5) * 20; // Reducir el offset para mantenerlos más cerca del camino
+          const angleRad = (baseAngle + offset) * Math.PI / 180;
+
+          // La fracción de la distancia determina cuán lejos del centro está el hoyo
+          // 0 para el centro, 1 para el borde de la elipse
+          const frac = distance / 25; // Asumiendo 25 pies es la distancia máxima
+
+          // Calcular la posición (x, y) del hoyo en la elipse
+          const x = cx + rx * frac * Math.cos(angleRad);
+          const y = cy + ry * frac * Math.sin(angleRad);
+
+          const isH = number === highlightedHole;
+          drawGolfBall(x, y, number, isH ? 18 : 12, isH);
+
+          if (isH) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`${distance.toFixed(1)} ft`, x, y + 20);
+          }
+        });
+      }
+
+      // Categoría de rendimiento para la lista de hoyos
+      function getPerformanceCategory(distance) {
+        if (distance <= 5) return 'Excelente';
+        if (distance <= 10) return 'Bueno';
+        if (distance <= 15) return 'Promedio';
+        if (distance <= 20) return 'Necesita Mejorar';
+        return 'Deficiente';
+      }
+
+      // Actualizar las estadísticas de rendimiento
+      function updatePerformanceStats() {
+          const distances = holes.map(hole => hole[1]);
+          const shortest = Math.min(...distances);
+          const longest = Math.max(...distances);
+          const totalDistance = distances.reduce((sum, dist) => sum + dist, 0);
+          const average = (totalDistance / distances.length).toFixed(1);
+          const bestPerformanceCount = distances.filter(dist => dist <= 5).length;
+
+          const shortestHole = holes.find(hole => hole[1] === shortest);
+          const longestHole = holes.find(hole => hole[1] === longest);
+
+          shortestPuttEl.textContent = `${shortest} ft`;
+          shortestPuttHoleEl.textContent = `Hoyo #${shortestHole[0]}`;
+          longestPuttEl.textContent = `${longest} ft`;
+          longestPuttHoleEl.textContent = `Hoyo #${longestHole[0]}`;
+          averagePuttEl.textContent = `${average} ft`;
+          bestPerformanceCountEl.textContent = `${bestPerformanceCount} hoyos`;
+      }
+
+      // Limpiar + redibujar todo
+      function drawScene(highlightedHole = null) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawContours();
+        drawSlopeArrows();
+        drawHoles(highlightedHole);
+      }
+
+      // ---------- FUNCIONES PARA EL MAPA DE CALOR DE PUTTS ----------
+      const puttHeatmapCanvas = document.getElementById('putt-heatmap-canvas');
+      const puttHeatmapCtx = puttHeatmapCanvas.getContext('2d');
+
+      function getPuttHeatmapColor(distance) {
+        // Normalizar la distancia entre 2 y 22 pies (rango de los datos)
+        const minDistance = 2;
+        const maxDistance = 22;
+        const normalized = (distance - minDistance) / (maxDistance - minDistance);
+
+        // Interpolar colores: verde (bueno) a rojo (malo)
+        // Usar HSL para una interpolación de color más suave
+        // Verde: HSL(120, 70%, 50%)
+        // Amarillo: HSL(60, 90%, 60%)
+        // Rojo: HSL(0, 70%, 50%)
+
+        let hue;
+        if (normalized <= 0.5) {
+          // Verde a Amarillo
+          hue = 120 - (normalized * 120); // 120 -> 60
+        } else {
+          // Amarillo a Rojo
+          hue = 60 - ((normalized - 0.5) * 120); // 60 -> 0
+        }
+        return `hsl(${hue}, 80%, 50%)`;
+      }
+
+      function drawPuttHeatmap() {
+        const numHoles = holes.length;
+        // Calcular el tamaño de cada celda del mapa de calor
+        const cellSize = puttHeatmapCanvas.width / numHoles;
+        const cellHeight = puttHeatmapCanvas.height;
+
+        // Limpiar el canvas
+        puttHeatmapCtx.clearRect(0, 0, puttHeatmapCanvas.width, puttHeatmapCanvas.height);
+
+        holes.forEach(([holeNumber, distance], index) => {
+          const x = index * cellSize;
+          const color = getPuttHeatmapColor(distance);
+
+          puttHeatmapCtx.fillStyle = color;
+          puttHeatmapCtx.fillRect(x, 0, cellSize, cellHeight);
+
+          // Dibujar el número del hoyo
+          puttHeatmapCtx.fillStyle = '#ffffff';
+          puttHeatmapCtx.font = 'bold 16px Inter';
+          puttHeatmapCtx.textAlign = 'center';
+          puttHeatmapCtx.textBaseline = 'middle';
+          puttHeatmapCtx.fillText(`Hoyo ${holeNumber}`, x + cellSize / 2, cellHeight / 2 - 10);
+
+          // Dibujar la distancia del putt
+          puttHeatmapCtx.font = '14px Inter';
+          puttHeatmapCtx.fillText(`${distance} ft`, x + cellSize / 2, cellHeight / 2 + 15);
+
+          // Dibujar un borde para cada celda
+          puttHeatmapCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+          puttHeatmapCtx.lineWidth = 1;
+          puttHeatmapCtx.strokeRect(x, 0, cellSize, cellHeight);
+        });
+      }
+
+      function resizePuttHeatmapCanvas() {
+        const container = puttHeatmapCanvas.parentElement;
+        puttHeatmapCanvas.width = container.clientWidth - 50; // Ajustar por el padding del contenedor
+        // La altura se mantiene fija, pero podemos ajustarla si es necesario
+        drawPuttHeatmap();
+      }
+
+
+      // ---------- INICIALIZACIÓN Y EVENTOS ----------
+
+      function init() {
+        resizeCanvas();
+        updatePerformanceStats();
+
+        // Poblar la lista de hoyos
+        holes.forEach(([number, distance]) => {
+          const div = document.createElement('div');
+          div.className = 'hole-item';
+          div.dataset.hole = number;
+          div.innerHTML = `
+            <div class="hole-number">Hoyo #${number}</div>
+            <div class="hole-distance">${distance} ft</div>
+            <div class="performance-category">${getPerformanceCategory(
+              distance
+            )}</div>
+          `;
+          holeList.appendChild(div);
+        });
+
+        // Dibujar la escena por primera vez
+        drawScene();
+        resizePuttHeatmapCanvas(); // Dibujar el mapa de calor
+
+        // Eventos para el green de putt
+        document.querySelectorAll('.hole-item').forEach((item) => {
+          item.addEventListener('mouseenter', function () {
+            const num = parseInt(this.dataset.hole);
+            drawScene(num);
+          });
+          item.addEventListener('mouseleave', function () {
+            drawScene();
+          });
+          item.addEventListener('click', function () {
+            const num = parseInt(this.dataset.hole);
+            drawScene(num);
+          });
+        });
+
+        window.addEventListener('resize', () => {
+          resizeCanvas();
+          drawScene();
+          resizePuttHeatmapCanvas(); // Redibujar el mapa de calor al redimensionar
+        });
+      }
+
+      // Esperar hasta que la foto esté completamente cargada para obtener las dimensiones correctas
+      if (photo.complete) {
+        init();
+      } else {
+        photo.onload = init;
+      }
+    });
+  </script>
+</body>
+</html>

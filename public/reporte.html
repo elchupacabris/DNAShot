@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DNA Shot · Reporte de Tarjeta</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2a6b3f;
+      --primary-light: #3c8e58;
+      --secondary: #f5fbe8;
+      --accent: #ff9a3d;
+      --light: #ffffff;
+      --dark: #1a3b23;
+      --gray: #6c757d;
+      --light-gray: #f8f9fa;
+      --border: #c2deb2;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-image: url('https://i.imgur.com/mc6pRZD.jpg');
+      background-size: cover;
+      background-position: center;
+      margin: 0;
+      padding: 0;
+      color: var(--dark);
+    }
+    .container {
+      background: rgba(255,255,255,0.96);
+      margin: 20px auto;
+      max-width: 1200px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 12px;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo img {
+      width: 60px;
+      height: 60px;
+    }
+    .header-text h1 {
+      font-size: 24px;
+      color: var(--primary);
+    }
+    .golf-icon i {
+      font-size: 40px;
+      color: var(--primary-light);
+    }
+    .card h2 {
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--secondary);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--gray);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      background-color: rgba(255,255,255,0.9);
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    thead {
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      color: white;
+    }
+    .handwritten {
+      font-family: 'Rock Salt', cursive;
+      font-size: 13px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--gray);
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .filter-inputs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .filter-inputs input {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-container">
+        <div class="logo">
+          <img src="https://i.imgur.com/Zz4zNFG.png" alt="DNA Shot Logo">
+        </div>
+        <div class="header-text">
+          <h1>DNA Shot · Reporte de Tarjeta</h1>
+        </div>
+      </div>
+      <div class="golf-icon">
+        <i class="fas fa-golf-ball"></i>
+      </div>
+    </header>
+
+    <div class="content-section">
+      <div class="card">
+        <h2><i class="fas fa-flag"></i> Estadísticas de la Ronda</h2>
+        <div class="stats-row" id="roundStats">
+          <div class="stat-card"><div class="stat-label">SCORE TOTAL</div><div class="stat-value" id="totalScore">0</div></div>
+          <div class="stat-card"><div class="stat-label">TOTAL PUTTS</div><div class="stat-value" id="totalPutts">0</div></div>
+          <div class="stat-card"><div class="stat-label">FIR EXITOSOS</div><div class="stat-value" id="firCount">0</div></div>
+          <div class="stat-card"><div class="stat-label">PROMEDIO DD</div><div class="stat-value" id="ddAvg">0</div></div>
+          <div class="stat-card"><div class="stat-label">GIR %</div><div class="stat-value" id="girPercent">0%</div></div>
+        </div>
+
+        <h2><i class="fas fa-table"></i> Detalles de la Tarjeta</h2>
+        <table id="scorecardTable">
+          <thead>
+            <tr>
+              <th>Hoyo</th><th>Par</th><th>Yds</th><th>Vent</th><th class="handwritten">Score</th>
+              <th class="handwritten">Putts</th><th class="handwritten">DD</th><th class="handwritten">Tipo</th><th class="handwritten">Dist</th><th class="handwritten">1st</th>
+              <th>FIR</th><th>GIR</th>
+            </tr>
+          </thead>
+          <tbody id="scorecardBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><i class="fas fa-list"></i> Tarjetas Disponibles</h2>
+        <div class="filter-inputs">
+          <input type="text" id="playerFilter" placeholder="Filtrar por jugador">
+          <input type="text" id="ccFilter" placeholder="Filtrar por campo">
+        </div>
+        <table id="scorecardsListTable">
+          <thead>
+            <tr><th>Jugador</th><th>Ronda</th><th>Fecha</th><th>Campo</th><th>Tee</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="scorecardsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>DNA Shot Analytics &copy; 2023 | Seguimiento de rendimiento de golf</p>
+    </div>
+  </div>
+
+  <audio id="golfSound"><source src="https://www.soundjay.com/misc/sounds/golf-ball-hit-1.mp3" type="audio/mpeg"></audio>
+
+  <script type="module" src="/scripts/report.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DNA Shot · Reporte de Tarjeta</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0a2e0f 0%, #1a5c2a 100%);
+      min-height: 100vh;
+      padding: 20px;
+      background-image: url('https://images.unsplash.com/photo-1514436598301-27a65f40469f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80');
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: multiply;
+      color: #f0f0f0;
+    }
+    
+    .container {
+      background: rgba(22, 27, 34, 0.95);
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 1px solid #30363d;
+    }
+    
+    header {
+      background: linear-gradient(to right, #1a5c2a, #238636);
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo {
+      width: 70px;
+      height: 70px;
+      background: #f8f8f8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .logo img {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .header-text {
+      color: white;
+    }
+    
+    .header-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header-text p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+    
+    .golf-icon {
+      font-size: 40px;
+      color: rgba(255,255,255,0.1);
+    }
+    
+    .content-section {
+      padding: 25px;
+      display: grid;
+      gap: 25px;
+    }
+    
+    .card {
+      background: #0d1117;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(1, 4, 9, 0.8);
+      padding: 25px;
+      border: 1px solid #30363d;
+    }
+    
+    .card h2 {
+      color: #58a6ff;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #30363d;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    
+    .card h2 i {
+      font-size: 26px;
+      color: #3fb950;
+    }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: rgba(35, 134, 54, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #30363d;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      background: rgba(35, 134, 54, 0.2);
+      transform: translateY(-3px);
+    }
+    
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3fb950;
+      margin: 5px 0;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #8b949e;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 15px;
+      border: 1px solid #30363d;
+    }
+    
+    thead {
+      background: linear-gradient(to right, #1a5c2a, #238636);
+    }
+    
+    th {
+      padding: 14px 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: white;
+    }
+    
+    tbody tr {
+      transition: background 0.2s;
+      background: #161b22;
+    }
+    
+    tbody tr:nth-child(even) {
+      background: #0d1117;
+    }
+    
+    tbody tr:hover {
+      background: rgba(46, 139, 87, 0.15);
+    }
+    
+    td {
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid #30363d;
+      font-size: 14px;
+    }
+    
+    .score-cell {
+      font-weight: 700;
+      color: #58a6ff;
+    }
+    
+    .fir-cell {
+      color: #3fb950;
+      font-weight: 700;
+    }
+    
+    .gir-cell {
+      color: #58a6ff;
+      font-weight: 700;
+    }
+    
+    tfoot td {
+      background: rgba(35, 134, 54, 0.15);
+      font-weight: bold;
+      color: #3fb950;
+      font-size: 15px;
+      border-bottom: none;
+    }
+    
+    .view-btn {
+      padding: 8px 16px;
+      background: linear-gradient(to right, #238636, #2ea043);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .view-btn:hover {
+      background: linear-gradient(to right, #2ea043, #3fb950);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(46, 160, 67, 0.3);
+    }
+    
+    .loader {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 30px;
+      background: rgba(13, 17, 23, 0.8);
+      border-radius: 12px;
+    }
+    
+    .loader-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(35, 134, 54, 0.2);
+      border-top: 4px solid #3fb950;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+    
+    .loader p {
+      color: #8b949e;
+      font-weight: 600;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .footer {
+      padding: 20px;
+      text-align: center;
+      color: #8b949e;
+      font-size: 14px;
+      border-top: 1px solid #30363d;
+    }
+    
+    .empty-data {
+      text-align: center;
+      padding: 40px !important;
+      color: #8b949e;
+    }
+    
+    .empty-data i {
+      font-size: 40px;
+      margin-bottom: 15px;
+      color: #3fb950;
+      opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 20px 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+      
+      table {
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 10px 5px;
+      }
+      
+      .view-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      
+      .content-section {
+        padding: 15px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-container">
+        <div class="logo">
+          <img src="https://i.imgur.com/Zz4zNFG.png" alt="DNA Shot Logo">
+        </div>
+        <div class="header-text">
+          <h1>DNA Shot · Reporte de Tarjeta</h1>
+          <p>Análisis detallado de rendimiento de golf</p>
+        </div>
+      </div>
+      <div class="golf-icon">
+        <i class="fas fa-golf-ball"></i>
+      </div>
+    </header>
+    
+    <div class="content-section">
+      <div class="card">
+        <h2><i class="fas fa-flag"></i> Estadísticas de la Ronda</h2>
+        
+        <div class="stats-row" id="roundStats">
+          <div class="stat-card">
+            <div class="stat-label">SCORE TOTAL</div>
+            <div class="stat-value" id="totalScore">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">TOTAL PUTTS</div>
+            <div class="stat-value" id="totalPutts">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">FIR EXITOSOS</div>
+            <div class="stat-value" id="firCount">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">PROMEDIO DD</div>
+            <div class="stat-value" id="ddAvg">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">GIR %</div>
+            <div class="stat-value" id="girPercent">0%</div>
+          </div>
+        </div>
+        
+        <h2><i class="fas fa-table"></i> Detalles de la Tarjeta</h2>
+        
+        <div class="loader" id="scorecardLoader">
+          <div class="loader-spinner"></div>
+          <p>Cargando detalles de la tarjeta...</p>
+        </div>
+        
+        <table id="scorecardTable">
+          <thead>
+            <tr>
+              <th>Hoyo</th>
+              <th>Par</th>
+              <th>Yds</th>
+              <th>Vent</th>
+              <th>Score</th>
+              <th>Putts</th>
+              <th>DD</th>
+              <th>Tipo</th>
+              <th>Dist</th>
+              <th>1st</th>
+              <th>FIR</th>
+              <th>GIR</th>
+            </tr>
+          </thead>
+          <tbody id="scorecardBody">
+            <tr>
+              <td colspan="12" class="empty-data">
+                <i class="fas fa-golf-ball"></i>
+                <p>Selecciona una tarjeta para ver los detalles</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <h2><i class="fas fa-list"></i> Tarjetas Disponibles</h2>
+        
+        <div class="loader" id="listLoader">
+          <div class="loader-spinner"></div>
+          <p>Cargando lista de tarjetas...</p>
+        </div>
+        
+        <table id="scorecardsListTable">
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Ronda</th>
+              <th>Fecha</th>
+              <th>Campo</th>
+              <th>Tee</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="scorecardsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>DNA Shot Analytics &copy; 2023 | Seguimiento de rendimiento de golf</p>
+    </div>
+  </div>
+  
+  <audio id="golfSound">
+    <source src="https://www.soundjay.com/misc/sounds/golf-ball-hit-1.mp3" type="audio/mpeg">
+  </audio>
+
+  <script type="module">
+    // Import Firebase from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDT8uclSbsMCGDjxohUe7x1jwnq4zInr6w",
+  authDomain: "dnashot-b2fa0.firebaseapp.com",
+  projectId: "dnashot-b2fa0",
+  storageBucket: "dnashot-b2fa0.firebasestorage.app",
+  messagingSenderId: "1054670174023",
+  appId: "1:1054670174023:web:74cf1fdfb7a3518638fe62",
+  measurementId: "G-JMHVGW13LF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const golfSound = document.getElementById('golfSound');
+
+    // Load scorecards list on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById("listLoader").style.display = "flex";
+      
+      try {
+        const table = document.getElementById("scorecardsTableBody");
+        const usersRef = collection(db, "users");
+        const userSnap = await getDocs(usersRef);
+        
+        for (const userDoc of userSnap.docs) {
+          const player = userDoc.id;
+          const scRef = collection(db, "users", player, "scorecards");
+          const scSnap = await getDocs(scRef);
+          
+          scSnap.forEach(doc => {
+            const d = doc.data();
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${player}</td>
+              <td>${doc.id}</td>
+              <td>${d.FECHA || "-"}</td>
+              <td>${d.CC || "-"}</td>
+              <td>${d.TEE || "-"}</td>
+              <td>
+                <button class="view-btn" onclick="viewScorecard('${player}', '${doc.id}')">
+                  <i class="fas fa-eye"></i> Ver
+                </button>
+              </td>
+            `;
+            table.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error("Error loading scorecards list:", error);
+      } finally {
+        document.getElementById("listLoader").style.display = "none";
+      }
+    });
+
+    // View scorecard function
+    window.viewScorecard = async function(player, round) {
+      // Play golf sound
+      golfSound.currentTime = 0;
+      golfSound.play();
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Show loader
+      document.getElementById("scorecardLoader").style.display = "flex";
+      document.getElementById("scorecardBody").innerHTML = "";
+      
+      try {
+        const ref = collection(db, "users", player, "scorecards", round, "holes");
+        const snap = await getDocs(ref);
+        const rows = [];
+        let totalScore = 0, totalPutts = 0, firCount = 0, girCount = 0, ddTotal = 0, ddCount = 0;
+        
+        snap.forEach(doc => {
+          const d = doc.data();
+          const hole = parseInt(doc.id);
+          const par = d.PAR || 4;
+          const score = d.Score || 0;
+          const putts = d.Putts || 0;
+          const dd = d.DD || 0;
+          const ddType = d.DDTYPE || "";
+          
+          // Calculate GIR
+          const strokesToGreen = score - putts;
+          let gir = "";
+          if (par === 3 && strokesToGreen <= 1) {
+            gir = "✓";
+            girCount++;
+          } else if (par === 4 && strokesToGreen <= 2) {
+            gir = "✓";
+            girCount++;
+          } else if (par === 5 && strokesToGreen <= 3) {
+            gir = "✓";
+            girCount++;
+          }
+          
+          // Calculate FIR
+          let fir = "";
+          if (ddType === 'F') {
+            fir = "✓";
+            firCount++;
+          }
+          
+          // Add to DD calculation if par 4 or 5
+          if (par === 4 || par === 5) {
+            ddTotal += dd;
+            ddCount++;
+          }
+          
+          // Update totals
+          totalScore += score;
+          totalPutts += putts;
+          
+          rows.push({
+            Hoyo: hole,
+            PAR: par, 
+            YDS: d.YDS || "", 
+            Vent: d.Ventaja || "",
+            Score: score, 
+            Putts: putts, 
+            DD: dd,
+            Tipo: ddType, 
+            Dist: d.PINDIST || 0, 
+            First: d["1STPU"] || 0,
+            FIR: fir, 
+            GIR: gir
+          });
+        });
+        
+        rows.sort((a,b) => a.Hoyo - b.Hoyo);
+        renderScorecard(rows);
+        
+        // Update stats
+        document.getElementById("totalScore").textContent = totalScore;
+        document.getElementById("totalPutts").textContent = totalPutts;
+        document.getElementById("firCount").textContent = firCount;
+        document.getElementById("girPercent").textContent = Math.round((girCount / rows.length) * 100) + "%";
+        document.getElementById("ddAvg").textContent = ddCount > 0 ? (ddTotal / ddCount).toFixed(1) + "y" : "N/A";
+        
+      } catch (error) {
+        console.error("Error loading scorecard:", error);
+      } finally {
+        document.getElementById("scorecardLoader").style.display = "none";
+      }
+    };
+
+    // Render scorecard table
+    function renderScorecard(data) {
+      const tbody = document.getElementById("scorecardBody");
+      tbody.innerHTML = "";
+      
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="12" class="empty-data">
+              <i class="fas fa-golf-ball"></i>
+              <p>No se encontraron datos para esta tarjeta</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.Hoyo}</td>
+          <td>${row.PAR}</td>
+          <td>${row.YDS}</td>
+          <td>${row.Vent}</td>
+          <td class='score-cell'>${row.Score}</td>
+          <td>${row.Putts}</td>
+          <td>${row.DD}</td>
+          <td>${row.Tipo}</td>
+          <td>${row.Dist}</td>
+          <td>${row.First}</td>
+          <td class='fir-cell'>${row.FIR}</td>
+          <td class='gir-cell'>${row.GIR}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>

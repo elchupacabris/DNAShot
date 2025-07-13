@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DNA Shot – Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+      background: url("images/golfbg.png") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-box {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .auth-box .logo {
+      width: 160px;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-box h1 {
+      color: #225a2b;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .auth-box button {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 2rem;
+      background-color: #225a2b;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .auth-box button:hover {
+      background-color: #1b4923;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <img src="images/logo.png" alt="DNA Shot Logo" class="logo" />
+    <h1>Welcome to DNA Shot</h1>
+
+    <button onclick="location.href='round-setup.html'">Start New Round</button>
+    <button onclick="location.href='dashboard.html'">View Past Scorecards</button>
+  </div>
+</body>
+</html>

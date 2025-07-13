@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Player Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+      background: url("images/golfbg.png") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-box {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+    .auth-box .logo {
+      width: 160px;
+      margin-bottom: 1rem;
+    }
+    .auth-box input,
+    .auth-box select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 2rem;
+      font-size: 1rem;
+    }
+    .auth-box button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #225a2b;
+      color: #fff;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .auth-box button:hover {
+      background-color: #1b4923;
+    }
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+    #gallery img {
+      width: 80px;
+      border-radius: 12px;
+    }
+    h1, h2 {
+      color: #225a2b;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <img src="images/logo.png" alt="DNA Shot Logo" class="logo" />
+    <h1>Player Details</h1>
+    <form id="playerForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="nick" placeholder="Nickname" />
+      <select id="tee" required>
+        <option value="">Preferred Tee Marks</option>
+        <option value="Black">Black</option>
+        <option value="Blue">Blue</option>
+        <option value="White">White</option>
+        <option value="Red">Red</option>
+        <option value="Green">Green</option>
+      </select>
+      <input type="text" id="fedecol" placeholder="Fedecol Golf #" />
+      <button type="submit">Save Player</button>
+    </form>
+    <h2>Pic Gallery</h2>
+    <div id="gallery">
+      <img src="images/chupacabris1.jpg" alt="chupacabris 1" />
+      <img src="images/chupacabris2.jpg" alt="chupacabris 2" />
+      <img src="images/chupacabris3.jpg" alt="chupacabris 3" />
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDT8uclSbsMCGDjxohUe7x1jwnq4zInr6w",
+      authDomain: "dnashot-b2fa0.firebaseapp.com",
+      projectId: "dnashot-b2fa0",
+      storageBucket: "dnashot-b2fa0.firebasestorage.app",
+      messagingSenderId: "1054670174023",
+      appId: "1:1054670174023:web:74cf1fdfb7a3518638fe62",
+      measurementId: "G-JMHVGW13LF"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const form = document.getElementById("playerForm");
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Please log in first.");
+        window.location.href = "index.html";
+        return;
+      }
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nombre  = document.getElementById("name").value.trim();
+        const nick    = document.getElementById("nick").value.trim();
+        const tee     = document.getElementById("tee").value;
+        const fedecol = document.getElementById("fedecol").value.trim();
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            nombre, nick, tee, fedecol
+          });
+          alert("✅ Player info saved!");
+          window.location.href = "HOME.html";
+        } catch (err) {
+          alert("❌ Error: " + err.message);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DNA Shot Analytics Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2a6b3f;
+      --primary-light: #3c8e58;
+      --secondary: #f5fbe8;
+      --accent: #ff9a3d;
+      --light: #ffffff;
+      --dark: #1a3b23;
+      --gray: #6c757d;
+      --light-gray: #f8f9fa;
+      --border: #c2deb2;
+      --success: #4caf50;
+      --warning: #ffc107;
+      --danger: #f44336;
+      --shadow: 0 4px 18px rgba(184, 203, 166, 0.3);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #e6f4e6 0%, #f5fbe8 100%);
+      font-family: 'Montserrat', sans-serif;
+      color: var(--dark);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 20px auto;
+      background: var(--light);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header h1 i {
+      color: var(--accent);
+    }
+    
+    .header-info {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 25px;
+    }
+    
+    /* Filters Panel */
+    .filters-panel {
+      background: var(--light-gray);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      height: fit-content;
+    }
+    
+    .filters-panel h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .filter-group {
+      margin-bottom: 25px;
+    }
+    
+    .filter-group h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--dark);
+      font-weight: 600;
+    }
+    
+    .filter-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      color: var(--dark);
+      transition: all 0.3s ease;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(42, 107, 63, 0.1);
+    }
+    
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: rgba(42, 107, 63, 0.1);
+    }
+    
+    /* Stats Cards */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+    
+    .stat-title {
+      font-size: 1rem;
+      color: var(--gray);
+      font-weight: 500;
+    }
+    
+    /* Table */
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--light);
+      font-size: 0.95rem;
+    }
+    
+    th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      text-align: left;
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+    }
+    
+    td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      color: var(--dark);
+    }
+    
+    tr:nth-child(even) {
+      background: var(--light-gray);
+    }
+    
+    tr:hover {
+      background: rgba(194, 222, 178, 0.2);
+    }
+    
+    .score-cell {
+      font-weight: 600;
+    }
+    
+    .low-score {
+      color: var(--success);
+    }
+    
+    .high-score {
+      color: var(--danger);
+    }
+    
+    /* Loader & Error */
+    .loader {
+      text-align: center;
+      padding: 40px;
+      color: var(--primary);
+      font-size: 1.2rem;
+      display: none;
+    }
+    
+    .loader i {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      display: block;
+      animation: spin 1.5s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error {
+      background: rgba(244, 67, 54, 0.1);
+      color: var(--danger);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-weight: 600;
+      display: none;
+    }
+    
+    /* Footer */
+    .footer {
+      padding: 20px 30px;
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+      
+      .filter-actions {
+        flex-direction: column;
+      }
+    }
+    .scorecard-table-wrapper table {
+  table-layout: fixed;
+}
+
+.scorecard-table-wrapper th,
+.scorecard-table-wrapper td {
+  width: 8.3%;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-golf-ball"></i> DNA Shot Analytics Dashboard</h1>
+    <div class="header-info">Análisis completo de tus tarjetas de golf</div>
+  </div>
+  
+  <div class="main-content">
+    <div class="filters-panel">
+      <h2><i class="fas fa-filter"></i> Filtros</h2>
+      
+      <div class="filter-group">
+        <h3>Jugador</h3>
+        <select id="userId" class="filter-select">
+          <option value="">Todos los jugadores</option>
+          <!-- Will be populated dynamically -->
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <h3>Año</h3>
+        <select id="yearFilter" class="filter-select">
+          <option value="">Todos los años</option>
+          <!-- Will be populated dynamically -->
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <h3>Mes</h3>
+        <select id="monthFilter" class="filter-select">
+          <option value="">Todos los meses</option>
+          <option value="1">Enero</option>
+          <option value="2">Febrero</option>
+          <option value="3">Marzo</option>
+          <option value="4">Abril</option>
+          <option value="5">Mayo</option>
+          <option value="6">Junio</option>
+          <option value="7">Julio</option>
+          <option value="8">Agosto</option>
+          <option value="9">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <h3>Club</h3>
+        <select id="clubFilter" class="filter-select">
+          <option value="">Todos los clubes</option>
+          <!-- Will be populated dynamically -->
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <h3>Ordenar por</h3>
+        <select id="sortBy" class="filter-select">
+          <option value="date">Fecha (reciente)</option>
+          <option value="score">Puntuación (baja)</option>
+          <option value="putts">Putts (baja)</option>
+          <option value="distance">Distancia (alta)</option>
+        </select>
+      </div>
+      
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="loadList()">
+          <i class="fas fa-sync-alt"></i> Aplicar Filtros
+        </button>
+        <button class="btn btn-outline" onclick="resetFilters()">
+          <i class="fas fa-times"></i> Limpiar
+        </button>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <div class="loader" id="loader">
+        <i class="fas fa-spinner"></i>
+        Cargando datos...
+      </div>
+      
+      <div class="error" id="error"></div>
+      
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-title">PROMEDIO DE SCORE</div>
+          <div class="stat-value" id="avgScore">0.0</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">ÍNDICE DE JUEGO</div>
+          <div class="stat-value" id="indexValue">0.0</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">PROMEDIO DE DD</div>
+          <div class="stat-value" id="avgDD">0<small>yd</small></div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">PROMEDIO DE PUTTS</div>
+          <div class="stat-value" id="avgPutts">0.0</div>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table id="cardsTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Jugador</th>
+              <th>Club</th>
+              <th>Score</th>
+              <th>Putts</th>
+              <th>DD (yd)</th>
+              <th>GIR</th>
+              <th>FIR</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Will be populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    DNA Shot Analytics &copy; 2025 - Todos los derechos reservados
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script>
+  // CONFIG FIREBASE
+  const firebaseConfig = {
+      apiKey: "AIzaSyDT8uclSbsMCGDjxohUe7x1jwnq4zInr6w",
+  authDomain: "dnashot-b2fa0.firebaseapp.com",
+  projectId: "dnashot-b2fa0",
+  storageBucket: "dnashot-b2fa0.firebasestorage.app",
+  messagingSenderId: "1054670174023",
+  appId: "1:1054670174023:web:74cf1fdfb7a3518638fe62",
+  measurementId: "G-JMHVGW13LF"
+  };
+  
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  
+  // Global variables
+  let allScorecards = [];
+  let uniqueYears = new Set();
+  let uniqueClubs = new Set();
+  
+  // DOM elements
+  const userIdSelect = document.getElementById('userId');
+  const yearFilter = document.getElementById('yearFilter');
+  const clubFilter = document.getElementById('clubFilter');
+  const loader = document.getElementById('loader');
+  const errorDiv = document.getElementById('error');
+  const cardsTable = document.getElementById('cardsTable');
+  
+  // Stats elements
+  const avgScoreElement = document.getElementById('avgScore');
+  const indexValueElement = document.getElementById('indexValue');
+  const avgDDElement = document.getElementById('avgDD');
+  const avgPuttsElement = document.getElementById('avgPutts');
+  
+  // Initialize page
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      showLoader();
+      
+      // Load users
+      const usersSnap = await db.collection('users').get();
+      usersSnap.forEach(u => {
+        userIdSelect.innerHTML += `<option value="${u.id}">${u.id}</option>`;
+      });
+      
+      // Load all scorecards
+      await loadAllScorecards();
+      
+      // Populate year filter
+      Array.from(uniqueYears).sort((a, b) => b - a).forEach(year => {
+        yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
+      });
+      
+      // Populate club filter
+      Array.from(uniqueClubs).sort().forEach(club => {
+        clubFilter.innerHTML += `<option value="${club}">${club}</option>`;
+      });
+      
+      // Load initial data
+      loadList();
+    } catch (err) {
+      showError("Error al cargar datos iniciales: " + err.message);
+    } finally {
+      hideLoader();
+    }
+  });
+  
+  // Load all scorecards from all users
+  async function loadAllScorecards() {
+    allScorecards = [];
+    uniqueYears.clear();
+    uniqueClubs.clear();
+    
+    const usersSnap = await db.collection('users').get();
+    for (const userDoc of usersSnap.docs) {
+      const uid = userDoc.id;
+      const scSnap = await db.collection(`users/${uid}/scorecards`).get();
+      
+      scSnap.forEach(doc => {
+        const data = doc.data();
+        data._userId = uid;
+        data._scorecardId = doc.id;
+        
+        // Add date object for filtering
+        if (data.date && data.date.toDate) {
+          data.dateObj = data.date.toDate();
+          const year = data.dateObj.getFullYear();
+          uniqueYears.add(year);
+        }
+        
+        // Track unique clubs
+        if (data.course) {
+          uniqueClubs.add(data.course);
+        }
+        
+        allScorecards.push(data);
+      });
+    }
+  }
+  
+  // Main function to load and display data
+  async function loadList() {
+    try {
+      showLoader();
+      clearError();
+      
+      // Get filter values
+      const userId = userIdSelect.value;
+      const year = yearFilter.value;
+      const month = monthFilter.value;
+      const club = clubFilter.value;
+      const sortBy = document.getElementById('sortBy').value;
+      
+      // Filter scorecards
+      let filteredScorecards = [...allScorecards];
+      
+      // Apply user filter
+      if (userId) {
+        filteredScorecards = filteredScorecards.filter(card => card._userId === userId);
+      }
+      
+      // Apply year filter
+      if (year) {
+        filteredScorecards = filteredScorecards.filter(card => 
+          card.dateObj && card.dateObj.getFullYear() == year
+        );
+      }
+      
+      // Apply month filter
+      if (month) {
+        filteredScorecards = filteredScorecards.filter(card => 
+          card.dateObj && (card.dateObj.getMonth() + 1) == month
+        );
+      }
+      
+      // Apply club filter
+      if (club) {
+        filteredScorecards = filteredScorecards.filter(card => 
+          card.course && card.course === club
+        );
+      }
+      
+      // Apply sorting
+      if (sortBy === 'date') {
+        filteredScorecards.sort((a, b) => b.dateObj - a.dateObj);
+      } else if (sortBy === 'score') {
+        filteredScorecards.sort((a, b) => (a.totalScore || 0) - (b.totalScore || 0));
+      } else if (sortBy === 'putts') {
+        filteredScorecards.sort((a, b) => (a.putts || 0) - (b.putts || 0));
+      } else if (sortBy === 'distance') {
+        filteredScorecards.sort((a, b) => {
+          const aAvg = a.drivingDistance && a.drivingDistance.length ? 
+            a.drivingDistance.reduce((sum, val) => sum + val, 0) / a.drivingDistance.length : 0;
+          const bAvg = b.drivingDistance && b.drivingDistance.length ? 
+            b.drivingDistance.reduce((sum, val) => sum + val, 0) / b.drivingDistance.length : 0;
+          return bAvg - aAvg;
+        });
+      }
+      
+      // Calculate statistics
+      calculateStatistics(filteredScorecards);
+      
+      // Update table
+      updateTable(filteredScorecards);
+      
+      if (filteredScorecards.length === 0) {
+        showInfo("No se encontraron tarjetas con los filtros seleccionados");
+      }
+    } catch (err) {
+      showError("Error al cargar datos: " + err.message);
+    } finally {
+      hideLoader();
+    }
+  }
+  
+  // Calculate statistics from scorecards
+  function calculateStatistics(scorecards) {
+    if (scorecards.length === 0) {
+      avgScoreElement.textContent = "0.0";
+      indexValueElement.textContent = "0.0";
+      avgDDElement.textContent = "0";
+      avgPuttsElement.textContent = "0.0";
+      return;
+    }
+    
+    let totalScore = 0;
+    let totalPutts = 0;
+    let totalDrivingDistance = 0;
+    let countDrivingDistance = 0;
+    let totalFairways = 0;
+    let totalGreens = 0;
+    
+    scorecards.forEach(card => {
+      // Total score
+      if (card.totalScore) {
+        totalScore += card.totalScore;
+      }
+      
+      // Putts
+      if (card.putts) {
+        totalPutts += card.putts;
+      }
+      
+      // Driving distance
+      if (card.drivingDistance && card.drivingDistance.length > 0) {
+        const avg = card.drivingDistance.reduce((sum, val) => sum + val, 0) / card.drivingDistance.length;
+        totalDrivingDistance += avg;
+        countDrivingDistance++;
+      }
+      
+      // Fairways and greens
+      if (card.fairwaysHit && card.fairwaysTotal) {
+        totalFairways += card.fairwaysHit / card.fairwaysTotal;
+      }
+      
+      if (card.greensInRegulation) {
+        totalGreens += card.greensInRegulation / 18;
+      }
+    });
+    
+    // Calculate averages
+    const avgScore = totalScore / scorecards.length;
+    const avgPutts = totalPutts / scorecards.length;
+    const avgDD = countDrivingDistance > 0 ? totalDrivingDistance / countDrivingDistance : 0;
+    const avgFairways = totalFairways / scorecards.length * 100;
+    const avgGreens = totalGreens / scorecards.length * 100;
+    
+    // Update UI
+    avgScoreElement.textContent = avgScore.toFixed(1);
+    avgPuttsElement.textContent = avgPutts.toFixed(1);
+    avgDDElement.textContent = Math.round(avgDD).toString();
+    
+    // Calculate index (simplified)
+    const indexValue = (avgScore - 72) * 0.96;
+    indexValueElement.textContent = indexValue.toFixed(1);
+  }
+  
+  // Update the table with filtered scorecards
+  function updateTable(scorecards) {
+    const tbody = cardsTable.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (scorecards.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td colspan="9" style="text-align: center; padding: 20px;">No se encontraron tarjetas</td>`;
+      tbody.appendChild(row);
+      return;
+    }
+    
+    scorecards.forEach(card => {
+      const row = document.createElement('tr');
+      
+      // Format date
+      const dateStr = card.dateObj ? 
+        `${card.dateObj.getDate().toString().padStart(2, '0')}/${(card.dateObj.getMonth() + 1).toString().padStart(2, '0')}/${card.dateObj.getFullYear()}` : 
+        'N/A';
+      
+      // Average driving distance
+      let avgDD = 'N/A';
+      if (card.drivingDistance && card.drivingDistance.length > 0) {
+        avgDD = Math.round(card.drivingDistance.reduce((sum, val) => sum + val, 0) / card.drivingDistance.length);
+      }
+      
+      // Score cell with color coding
+      let scoreClass = '';
+      if (card.totalScore < 75) scoreClass = 'low-score';
+      else if (card.totalScore > 85) scoreClass = 'high-score';
+      
+      row.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${card._userId}</td>
+        <td>${card.course || 'N/A'}</td>
+        <td class="score-cell ${scoreClass}">${card.totalScore || 'N/A'}</td>
+        <td>${card.putts || 'N/A'}</td>
+        <td>${avgDD}</td>
+        <td>${card.greensInRegulation || 'N/A'}/18</td>
+        <td>${card.fairwaysHit || 'N/A'}/${card.fairwaysTotal || 'N/A'}</td>
+        <td><button class="btn-outline" style="padding: 5px 10px; font-size: 0.85rem;" onclick="viewScorecard('${card._userId}', '${card._scorecardId}')">Ver</button></td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+  }
+  
+  // View scorecard details
+  function viewScorecard(userId, scorecardId) {
+    alert(`Ver detalles de tarjeta:\nUsuario: ${userId}\nID de tarjeta: ${scorecardId}`);
+    // In a real implementation, this would open a modal with detailed scorecard data
+  }
+  
+  // Reset all filters
+  function resetFilters() {
+    userIdSelect.value = '';
+    yearFilter.value = '';
+    monthFilter.value = '';
+    clubFilter.value = '';
+    document.getElementById('sortBy').value = 'date';
+    loadList();
+  }
+  
+  // UI Helper functions
+  function showLoader() {
+    loader.style.display = 'block';
+  }
+  
+  function hideLoader() {
+    loader.style.display = 'none';
+  }
+  
+  function showError(message) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+  }
+  
+  function showInfo(message) {
+    errorDiv.textContent = message;
+    errorDiv.style.background = 'rgba(42, 107, 63, 0.1)';
+    errorDiv.style.color = 'var(--primary)';
+    errorDiv.style.display = 'block';
+  }
+  
+  function clearError() {
+    errorDiv.style.display = 'none';
+    errorDiv.style.background = '';
+    errorDiv.style.color = '';
+  }
+</script>
+</body>
+</html>

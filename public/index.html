@@ -1,53 +1,127 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DNA Shot – Entrar / Crear Cuenta</title>
-
-  <!-- Fuentes de Google -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-  
-  <!-- Tu CSS externo -->
-  <link rel="stylesheet" href="/css/login.css">
-
-  <!-- Firebase SDKs (compat version) -->
-  <!-- Nota: Estos se cargan en el head porque los necesitamos para la inicialización y el script de login/signup -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DNA Shot – Welcome</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Rock+Salt&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: "Montserrat", sans-serif;
+      background: url("images/golfbg.png") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-box {
+      background: rgba(255,255,255,0.85);
+      padding: 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .auth-box .logo {
+      width: 160px;
+      margin-bottom: 1rem;
+    }
+    .auth-box input {
+      width: 100%; padding: .75rem; margin-bottom: 1rem;
+      border: 1px solid #ddd; border-radius: 2rem; font-size: 1rem;
+    }
+    .auth-box button {
+      width: 100%; padding: .75rem;
+      background-color: #225a2b; color: #fff;
+      border: none; border-radius: 2rem;
+      font-size: 1rem; cursor: pointer;
+      transition: background-color .2s ease;
+    }
+    .auth-box button:hover { background-color: #1b4923; }
+    .toggle {
+      margin-top: .75rem; font-size: .9rem;
+    }
+    .toggle a {
+      color: #225a2b; font-weight: 700;
+      text-decoration: none; cursor: pointer;
+    }
+    .error {
+      color: #b00020; font-size: .9rem;
+      margin-bottom: 1rem; min-height: 1.2rem;
+    }
+  </style>
 </head>
-
 <body>
-  <div class="container">
-    <img src="/images/logo.png" alt="DNA Shot Logo" class="logo" />
-
-    <!-- ===== LOGIN SECTION ===== -->
-    <div class="form-section" id="login-section">
-      <h2>Entrar</h2>
-      <label for="login-email">Email</label>
-      <input type="email" id="login-email" class="style3" placeholder="tu@correo.com" />
-      <label for="login-password">Contraseña</label>
-      <input type="password" id="login-password" class="style3" />
-      <button id="login-btn" class="style3">Entrar</button>
-      <div class="msg" id="login-msg"></div>
-      <div class="toggle-link" id="show-signup">¿No tienes cuenta? Crear Cuenta</div>
-    </div>
-
-    <!-- ===== SIGNUP SECTION ===== -->
-    <div class="form-section" id="signup-section" style="display: none;">
-      <h2>Crear Cuenta</h2>
-      <label for="signup-email">Email</label>
-      <input type="email" id="signup-email" class="style3" placeholder="tu@correo.com" />
-      <label for="signup-password">Contraseña</label>
-      <input type="password" id="signup-password" class="style3" />
-      <button id="signup-btn" class="style3">Crear Cuenta</button>
-      <div class="msg" id="signup-msg"></div>
-      <div class="toggle-link" id="show-login">¿Ya tienes cuenta? Entrar</div>
+  <audio id="bg-birdsong" src="audio/morning-birdsong-spain-49895.mp3" autoplay loop></audio>
+  <audio id="click-sound" src="golf-1-94133.mp3"></audio>
+  <div class="auth-box">
+    <img src="images/logo.png" alt="DNA Shot Logo" class="logo"/>
+    <div class="error" id="error-msg"></div>
+    <input id="email" type="email" placeholder="Email" required/>
+    <input id="password" type="password" placeholder="Password" required/>
+    <button id="auth-button">Login</button>
+    <div class="toggle">
+      <span id="toggle-msg">Don't have an account? </span>
+      <a href="#" id="toggle-link">Sign up</a>
     </div>
   </div>
-
-  <!-- Tu JavaScript externo -->
-  <script src="/js/login.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDT8uclSbsMCGDjxohUe7x1jwnq4zInr6w",
+      authDomain: "dnashot-b2fa0.firebaseapp.com",
+      projectId: "dnashot-b2fa0",
+      storageBucket: "dnashot-b2fa0.firebasestorage.app",
+      messagingSenderId: "1054670174023",
+      appId: "1:1054670174023:web:74cf1fdfb7a3518638fe62",
+      measurementId: "G-JMHVGW13LF"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const authButton = document.getElementById("auth-button");
+    const errorBox = document.getElementById("error-msg");
+    const toggleMsg = document.getElementById("toggle-msg");
+    const toggleLink = document.getElementById("toggle-link");
+    const clickAudio = document.getElementById("click-sound");
+    let isLogin = true;
+    toggleLink.addEventListener("click", e => {
+      e.preventDefault();
+      isLogin = !isLogin;
+      authButton.textContent = isLogin ? "Login" : "Sign Up";
+      toggleMsg.textContent = isLogin ? "Don't have an account? " : "Already have an account? ";
+      toggleLink.textContent = isLogin ? "Sign up" : "Login";
+      errorBox.textContent = "";
+    });
+    authButton.addEventListener("click", async e => {
+      e.preventDefault();
+      errorBox.textContent = "";
+      clickAudio.play();
+      try {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+        const user = auth.currentUser;
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists() && userSnap.data().nombre) {
+          window.location.href = "HOME.html";
+        } else {
+          window.location.href = "players-details.html";
+        }
+      } catch (err) {
+        errorBox.textContent = err.message.replace("Firebase: Error (auth/", "").replace(").", "").replace(/-/g, " ");
+      }
+    });
+  </script>
 </body>
 </html>

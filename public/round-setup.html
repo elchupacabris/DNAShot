@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DNA Shot – Round Setup</title>
+
+  <!-- Google Fonts & Global Styles -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    body { /* center the .card */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: url("images/golfbg.png") no-repeat center center fixed;
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="images/logo.png" class="logo" alt="DNA Shot Logo" />
+    <h1>Start New Round</h1>
+    <form id="setup-form">
+      <select id="course-select" required>
+        <option disabled selected>Loading courses…</option>
+      </select>
+
+      <input id="date-played" type="date" required />
+
+      <select id="tee-select" required>
+        <option value="" disabled selected>Select tee mark</option>
+        <option value="white">White</option>
+        <option value="blue">Blue</option>
+        <option value="gold">Gold</option>
+      </select>
+
+      <select id="holes-select" required>
+        <option value="18">18 Holes</option>
+        <option value="front9">Front 9</option>
+        <option value="back9">Back 9</option>
+      </select>
+
+      <button type="submit">Go to Scorecard</button>
+    </form>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const cfg = {
+      apiKey: "...", authDomain: "...",
+      projectId: "...", storageBucket: "...",
+      messagingSenderId: "...", appId: "...",
+      measurementId: "..."
+    };
+    firebase.initializeApp(cfg);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    const click = new Audio("golf-1-94133.mp3");
+
+    // Only show if signed in
+    auth.onAuthStateChanged(u => {
+      if (!u) return window.location.href = "index.html";
+      loadCourses();
+    });
+
+    function loadCourses() {
+      const sel = document.getElementById("course-select");
+      sel.innerHTML = '<option disabled>Loading…</option>';
+      db.collection("courses").get().then(snap => {
+        sel.innerHTML = '<option value="" disabled selected>Select course</option>';
+        snap.forEach(doc => {
+          const { nombre } = doc.data();
+          const o = document.createElement("option");
+          o.value = doc.id;
+          o.textContent = nombre;
+          sel.appendChild(o);
+        });
+      });
+    }
+
+    document.getElementById("setup-form").addEventListener("submit", e => {
+      e.preventDefault();
+      click.play();
+      const course = courseSelect.value;
+      const date   = datePlayed.value;
+      const tee    = teeSelect.value;
+      const holes  = holesSelect.value;
+      const params = new URLSearchParams({ course, date, tee, holes });
+      window.location.href = `scorecard-input.html?${params}`;
+    });
+  </script>
+</body>
+</html>

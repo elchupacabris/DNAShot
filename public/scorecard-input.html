@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DNA Shot – Scorecard Input</title>
+
+  <!-- FUENTES -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Rock+Salt&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ----------------- VARIABLES ----------------- */
+    :root {
+      --green-dark: #225a2b;
+      --pencil: #444444e8;
+      --yds-blanca: #fff;
+      --yds-azul: #1c3fa8;
+      --yds-roja: #f95959;
+      --box-size: 62px;
+      --elegant-bg: rgba(255, 255, 255, 0.284);
+      --bright-yellow: #FFE600; /* fallback if CSS var isn’t supported */
+
+      /* Shadows for the golf-ball buttons */
+      --ball-shadow: rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==================== RESET & GLOBALS ==================== */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('images/golfbg.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: #214a24;
+    }
+    /* Link and button defaults */
+    a, button {
+      font-family: inherit;
+      text-decoration: none;
+    }
+    button {
+      border: none;
+      outline: none;
+    }
+
+    /* ==================== LAYOUT CONTAINERS ==================== */
+    /* Main container holding form-panel + scorecard */
+    .main-container {
+      display: flex;
+      gap: 28px;
+      margin-top: 32px;
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 16px;
+    }
+
+    /* Form panel (left) */
+    .form-panel {
+      background: var(--elegant-bg);
+      border-radius: 16px;
+      padding: 18px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.11);
+      flex: 0 0 240px;     /* On large screens, try to stay 240px wide */
+      max-width: 100%;     /* But never exceed container width */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Scorecard (right) */
+    .scorecard {
+      background: var(--elegant-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.11);
+      padding: 12px 6px 16px;
+      flex: 1 1 auto;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Wrapper to allow horizontal scrolling if needed */
+    .scorecard-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    /* ==================== FORM PANEL CONTENT ==================== */
+    .form-panel img.logo {
+      width: 98px;
+      margin-bottom: 7px;
+      margin-top: 18px;
+      display: block;
+    }
+    .box-hoyo-title {
+      font-size: 1.13rem;
+      color: #215b2b;
+      font-weight: 700;
+      margin-bottom: 3px;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+    .box-hole-num {
+      width: calc(var(--box-size) * 2 + 13px);
+      height: 53px;
+      background: #dbece7;
+      color: #1a5630;
+      font-size: 2rem;
+      border-radius: 13px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 1px 4px #b1cab2;
+      border: 1.5px solid #aac3a6;
+      letter-spacing: 0.6px;
+    }
+
+    /* Hole info grid (Par, Yds, Ventaja, Over Par) */
+    .hole-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, var(--box-size));
+      grid-template-rows: repeat(2, var(--box-size));
+      gap: 9px 13px;
+      margin-bottom: 19px;
+      width: calc(var(--box-size) * 2 + 13px);
+      max-width: 150px;
+      align-items: center;
+      justify-items: center;
+    }
+    .hole-info-box {
+      width: var(--box-size);
+      height: var(--box-size);
+      background: #eaf4d7;
+      color: #215b2b;
+      border-radius: 10px;
+      font-size: 1.03rem;
+      font-weight: 700;
+      border: 1.5px solid #d4eac6;
+      box-shadow: 0 2px 6px #cde8b8;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2px 0;
+      transition: background 0.2s;
+    }
+    .hole-info-box.overpar-box .label {
+      font-size: 0.78rem;
+      color: #957100;
+      font-weight: 700;
+      margin-bottom: 1px;
+    }
+    .hole-info-box.overpar-box .value {
+      font-size: 1.09rem;
+      color: #c44b0a;
+      font-weight: 700;
+    }
+    .hole-info-box span.label {
+      font-size: 0.85rem;
+      color: #5f8466;
+      font-weight: 400;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .hole-info-box span.value {
+      font-size: 1.15rem;
+      color: #214a24;
+      font-weight: 700;
+    }
+
+    /* Input grid (Score, Putts, DD, Tipo DD, Dist Pin, 1er Putt) */
+    .input-vertical-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 8px;
+      width: 158px;
+      justify-content: center;
+      margin: 0 auto 0 auto;
+    }
+    .input-group {
+      width: 72px;
+      min-width: 70px;
+      max-width: 72px;
+      height: 55px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 13px;
+      box-shadow: 0 3px 9px #c6dcc4;
+      border: 1.6px solid #a4cfb5;
+      margin: 0 auto;
+      padding: 0 0 2px 0;
+      transition: box-shadow 0.2s;
+    }
+    .input-group label {
+      font-size: 0.82rem;
+      color: #22743b;
+      margin-bottom: 0px;
+      margin-top: 1px;
+      text-align: center;
+      height: 12px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .input-group input,
+    .input-group select {
+      width: 45px;
+      min-width: 44px;
+      max-width: 48px;
+      height: 24px;
+      font-family: 'Rock Salt', cursive;
+      font-size: 0.57rem;
+      text-align: center;
+      padding: 0;
+      border: 1.4px solid #6ebd81;
+      border-radius: 7px;
+      background: #f9fff7;
+      color: #2d632e;
+      box-shadow: 0 1.5px 4px #d6edd2;
+      margin: 0;
+      margin-top: 2px;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #2b8c55;
+      background: #e4ffe0;
+    }
+    /* Ocultar DD/DDType/Dist2pin para Par 3 */
+    .input-group.hide {
+      visibility: hidden !important;
+    }
+
+    /* Elegant styling for inputs on desktop */
+    .elegant-boxes {
+      background: #f0f8f5;
+      border: 1px solid #aac3a6;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .elegant-boxes label {
+      color: #22743b;
+      font-size: 0.82rem;
+    }
+    .elegant-boxes input,
+    .elegant-boxes select {
+      border: 1px solid #6ebd81;
+      border-radius: 7px;
+      background: #f9fff7;
+      color: #2d632e;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    #hole-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    .button-group {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 200px;
+      margin-top: 15px;
+      gap: 10px;
+    }
+    .nav-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 4px 8px var(--ball-shadow);
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .nav-btn:hover {
+      transform: scale(1.1);
+    }
+    #prev-btn {
+      background-image: url('public/images/prev-ball.png'); /* yellow Pro V1 */
+    }
+    #next-btn {
+      background-image: url('public/images/next-ball.png'); /* white Pro V1 */
+    }
+    /* Overlay the arrow icon on top */
+    #prev-btn::after,
+    #next-btn::after {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 16px;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      background-color: #333;
+      position: relative;
+      z-index: 1;
+    }
+    #prev-btn::after {
+      mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBvbHlsaW5lIHBvaW50cz0iMTUgMTggOSAxMiAxNSA2Ii8+PC9zdmc+');
+    }
+    #next-btn::after {
+      mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBvbHlsaW5lIHBvaW50cz0iOSA2IDE1IDEyIDkgMTgiLz48L3N2Zz4=');
+    }
+
+    .form-panel button#save-btn {
+      background: #6fa542;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 15px;
+      width: auto;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 1.5px 2px #b5c7aa;
+      cursor: pointer;
+      margin-top: 15px;
+      display: none;
+    }
+    #save-btn:hover {
+      background: #5d9237;
+    }
+
+    /* ==================== SCORECARD TABLE ==================== */
+    .scorecard-title {
+      font-size: 1.15rem;
+      color: var(--green-dark);
+      font-weight: 700;
+      margin-bottom: 7px;
+      margin-top: 5px;
+      text-align: center;
+    }
+    .scorecard-table-wrapper table {
+      border-collapse: collapse;
+      font-size: 1.02rem;
+      margin: 0;
+      min-width: 600px;     /* only scroll if container < 600px */
+      width: 100%;
+      line-height: 1.2; /* Ajuste para Montserrat */
+    }
+    th, td {
+      border: 1px solid #d4d4aa;
+      width: 1.3cm; /* Ancho reducido a 1.3cm */
+      min-width: 1.3cm;
+      max-width: 1.3cm;
+      height: 1.5em;          /* Alto fijo */
+      padding: 0.1em 0; /* Padding reducido verticalmente */
+      text-align: center;
+      box-sizing: border-box;
+      font-size: 1.03rem;
+      vertical-align: middle;
+      background: #fffbe8;
+      color: #262626;
+      overflow: hidden; /* Evitar desbordamiento */
+    }
+    th {
+      background: #eaecc7;
+      color: var(--green-dark);
+      font-weight: bold;
+      font-size: 1.07rem;
+      border-bottom: 2px solid #aab8a6;
+    }
+    td.hole-col {
+      background: var(--green-dark);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    td.par-col, th.par-col {
+      background: #f9efd2;
+      font-weight: bold;
+    }
+    td.yds-col, th.yds-col {
+      background: #e1eaff;
+      font-weight: bold;
+    }
+    td.yds-col.yds-blanca {
+      background: var(--yds-blanca);
+      color: #1b1b1b;
+    }
+    td.yds-col.yds-azul {
+      background: var(--yds-azul);
+      color: #fff;
+    }
+    td.yds-col.yds-roja {
+      background: var(--yds-roja);
+      color: #fff;
+    }
+    .vent-col {
+      background: #ffeeb7;
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+    .data-col {
+      font-family: 'Rock Salt', cursive;
+      color: var(--pencil);
+      background: #fcfcfc;
+      border: 1.2px solid #c8c7c1;
+      box-shadow: 0 0 0.5px 0.5px #e7e5e0 inset;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, color 0.2s;
+    }
+    /* PUTTS COLORS */
+    .putt-azul {
+      background: #e0f0ff !important;
+      color: #125ad1 !important;
+      font-weight: bold;
+      border: 2px solid #4390e3 !important;
+    }
+    .putt-rojo {
+      background: #ffe4e0 !important;
+      color: #d12b2b !important;
+      font-weight: bold;
+      border: 2px solid #e08585 !important;
+    }
+    /* DRIVER COLORS */
+    .dd-azul {
+      background: #e0f9ff !important;
+      color: #0b7fab !important;
+      font-weight: bold;
+      border: 2px solid #2fb3d1 !important;
+    }
+    .dd-rojo {
+      background: #ffeaea !important;
+      color: #be2828 !important;
+      font-weight: bold;
+      border: 2px solid #c46b6b !important;
+    }
+    /* Birdie con círculo sin afectar altura */
+    .birdie {
+      position: relative;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .birdie::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1.3em;
+      height: 1.3em;
+      border: 2.2px solid #225a2b;
+      border-radius: 50%;
+      z-index: -1;
+    }
+    .bogey {
+      background: #fff3f3;
+      border: 2px solid #d22626;
+      color: #d22626;
+      border-radius: 6px;
+      font-weight: bold;
+      padding: 0 6px;
+    }
+    .scorecard tfoot td {
+      background: #d7f0bb;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: #134e13;
+      min-width: 1.3cm;
+      max-width: 1.3cm;
+    }
+    .fir-check, .gir-check {
+      color: var(--green-dark);
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    /* ==================== MESSAGE STYLES ==================== */
+    #form-msg {
+      min-height: 1.2em;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      display: none;
+    }
+    .success-msg {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: #27ae60;
+      border: 1px solid #2ecc71;
+      display: block;
+    }
+    .error-msg {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: #c0392b;
+      border: 1px solid #e74c3c;
+      display: block;
+    }
+
+    /* ==================== RESPONSIVE BREAKPOINTS ==================== */
+    /* Tablet (up to 1024px) */
+    @media (max-width: 1024px) {
+      .main-container {
+        gap: 20px;
+      }
+      .form-panel {
+        flex: 0 0 220px;
+      }
+      .scorecard-table-wrapper table {
+        min-width: 560px;
+      }
+      th, td {
+        width: 1.1cm; /* Reducir para tablet */
+        min-width: 1.1cm;
+        max-width: 1.1cm;
+      }
+    }
+
+    /* Mobile (up to 768px) */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .form-panel {
+        flex: 1 1 auto;
+        max-width: 100%;
+      }
+      .input-group {
+        width: 56px;
+        min-width: 54px;
+      }
+      .nav-btn {
+        width: 36px;
+        height: 36px;
+      }
+      #save-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      .scorecard-table-wrapper table {
+        min-width: 100%;
+      }
+      th, td {
+        min-width: 0.9cm;
+        max-width: 0.9cm;
+        font-size: 0.9rem;
+        width: 0.9cm;
+      }
+    }
+
+    /* Very small phones (up to 480px) */
+    @media (max-width: 480px) {
+      .input-group {
+        width: 48px;
+        min-width: 46px;
+      }
+      .nav-btn {
+        width: 32px;
+        height: 32px;
+      }
+      th, td {
+        min-width: 0.8cm;
+        max-width: 0.8cm;
+        font-size: 0.8rem;
+        width: 0.8cm;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<img src="images/logo.png" class="floating-logo" style="position:fixed;top:18px;left:18px;width:66px;z-index:999;" />
+ <!-- Audio para ambientación durante llenado -->
+  <audio id="bg-audio" src="audio/morning-birdsong-spain-49895.mp3" loop></audio>
+  <!-- Audio click para navegación -->
+  <audio id="click-audio" src="audio/golf-9-94171.mp3"></audio>
+
+  <div class="main-container">
+    <!-- ========== FORM PANEL ========== -->
+    <div class="form-panel">
+      <img src="images/logo.png" alt="DNA Shot Logo" class="logo" />
+
+      <div class="box-hoyo-title">HOYO</div>
+      <div class="box-hole-num" id="box-hole-num">1</div>
+
+      <div class="hole-info-grid">
+        <div class="hole-info-box"><span class="label">Par</span><span class="value" id="info-par"></span></div>
+        <div class="hole-info-box"><span class="label">Yds</span><span class="value" id="info-yds"></span></div>
+        <div class="hole-info-box"><span class="label">Ventaja</span><span class="value" id="info-vent"></span></div>
+        <div class="hole-info-box overpar-box"><span class="label">Over Par</span><span class="value" id="info-overpar"></span></div>
+      </div>
+
+      <form id="hole-form" autocomplete="off">
+        <div class="input-vertical-group">
+          <!-- Campos de input para cada hoyo -->
+          <div class="input-group elegant-boxes" id="score-group">
+            <label for="score">Score</label>
+            <input type="number" id="score" maxlength="3" required />
+          </div>
+          <div class="input-group elegant-boxes" id="putts-group">
+            <label for="putts">Putts</label>
+            <input type="number" id="putts" maxlength="2" required />
+          </div>
+          <div class="input-group elegant-boxes" id="dd-group">
+            <label for="dd">DD</label>
+            <input type="number" id="dd" maxlength="3" />
+          </div>
+          <div class="input-group elegant-boxes" id="ddtype-group">
+            <label for="ddtype">Tipo DD</label>
+            <select id="ddtype">
+              <option value="">-</option>
+              <option>FIR</option>
+              <option>L</option>
+              <option>R</option>
+              <option>SAND</option>
+              <option>OB</option>
+              <option>HZ</option>
+              <option>LB</option>
+            </select>
+          </div>
+          <div class="input-group elegant-boxes" id="dist2pin-group">
+            <label for="dist2pin">Dist Pin</label>
+            <input type="number" id="dist2pin" maxlength="3" />
+          </div>
+          <div class="input-group elegant-boxes" id="firstputt-group">
+            <label for="firstputt">1er Putt</label>
+            <input type="number" id="firstputt" maxlength="3" />
+          </div>
+        </div>
+
+        <!-- Botones de navegación -->
+        <div class="button-group">
+          <button type="button" class="nav-btn" id="prev-btn"></button>
+          <button type="button" class="nav-btn" id="next-btn"></button>
+        </div>
+
+        <!-- Botón Guardar -->
+        <button type="button" id="save-btn">Guardar tarjeta</button>
+        <div id="form-msg"></div>
+      </form>
+    </div>
+
+    <!-- ========== SCORECARD ========== -->
+    <div class="scorecard">
+      <div class="scorecard-title" id="scorecard-title"></div>
+      <div class="scorecard-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="hole-col">Hoyo</th>
+              <th class="par-col">Par</th>
+              <th class="yds-col">Yds</th>
+              <th class="vent-col">Vent</th>
+              <th>Score</th>
+              <th>Putts</th>
+              <th id="dd-th">DD</th>
+              <th>Tipo</th>
+              <th>Dist</th>
+              <th>1st</th>
+              <th>FIR</th>
+              <th>GIR</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">Total</td>
+              <td id="sum-score"></td>
+              <td id="sum-putts"></td>
+              <td id="sum-dd"></td>
+              <td colspan="2" id="fir-count"></td>
+              <td id="gir-count"></td>
+              <td colspan="2"></td>
+            </tr>
+            <tr>
+              <td colspan="4">Promedios</td>
+              <td id="fir-percentage"></td>
+              <td id="gir-percentage"></td>
+              <td id="avg-dd"></td>
+              <td id="avg-dist2pin"></td>
+              <td id="avg-firstputt"></td>
+              <td colspan="3"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCRIPTS FIREBASE & LÓGICA ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      writeBatch,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBkeimnGI9VE6yrbFRkUHkuTe4fQYiVfRU",
+      authDomain: "golf-scorecard-1847c.firebaseapp.com",
+      projectId: "golf-scorecard-1847c",
+      storageBucket: "golf-scorecard-1847c.appspot.com",
+      messagingSenderId: "235438574345",
+      appId: "1:235438574345:web:30b64c560c06baaed9e1d8",
+      measurementId: "G-LCZMZ1JVSD"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const holes = JSON.parse(localStorage.getItem('currentHoles') || '[]');
+    const round = JSON.parse(localStorage.getItem('currentRound') || '{}');
+
+    let currentUserUid = null;
+    const boxHoleNum = document.getElementById('box-hole-num');
+    const infoPar = document.getElementById('info-par');
+    const infoYds = document.getElementById('info-yds');
+    const infoVent = document.getElementById('info-vent');
+    const infoOverpar = document.getElementById('info-overpar');
+    const tbody = document.getElementById('scorecard-body');
+    const formMsg = document.getElementById('form-msg');
+    const scorecardTitle = document.getElementById('scorecard-title');
+    const saveBtn = document.getElementById('save-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const ddGroup = document.getElementById('dd-group');
+    const ddtypeGroup = document.getElementById('ddtype-group');
+    const dist2pinGroup = document.getElementById('dist2pin-group');
+    const firstputtGroup = document.getElementById('firstputt-group');
+    const ddTh = document.getElementById('dd-th');
+
+    // Elementos de audio
+    const bgAudio = document.getElementById('bg-audio');
+    const clickAudio = document.getElementById('click-audio');
+
+    let teeColorClass = '';
+    if (round.tee && typeof round.tee === "string") {
+      const t = round.tee.trim().toUpperCase();
+      if (t === "BLANCA" || t === "BLANCAS") teeColorClass = 'yds-blanca';
+      if (t === "AZUL" || t === "AZULES") teeColorClass = 'yds-azul';
+      if (t === "ROJA" || t === "ROJAS") teeColorClass = 'yds-roja';
+    }
+
+    let idx = 0;
+    let scorecard = Array(holes.length).fill(null);
+
+    const field = round.course || '';
+    const dateObj = round.date ? new Date(round.date) : new Date();
+    const dateStr = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth()+1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+    scorecardTitle.textContent = `${field} — ${dateStr}`;
+
+    function getDDStats() {
+      let longest = null, shortest = null;
+      holes.forEach((h, i) => {
+        if (h.par != 3 && scorecard[i] && scorecard[i].dd) {
+          let dd = Number(scorecard[i].dd);
+          if (!isNaN(dd)) {
+            if (longest === null || dd > longest) longest = dd;
+            if (shortest === null || dd < shortest) shortest = dd;
+          }
+        }
+      });
+      return {longest, shortest};
+    }
+
+    function getOverPar(currentIdx) {
+      let sumScore = 0, sumPar = 0;
+      for (let i = 0; i <= currentIdx; i++) {
+        if (scorecard[i] && scorecard[i].score) sumScore += Number(scorecard[i].score);
+        if (holes[i] && holes[i].par) sumPar += Number(holes[i].par);
+      }
+      let diff = sumScore - sumPar;
+      if (isNaN(diff)) return '';
+      return diff > 0 ? `+${diff}` : (diff === 0 ? '0' : diff);
+    }
+
+    function renderScorecard() {
+      tbody.innerHTML = '';
+      const ddStats = getDDStats();
+      holes.forEach((h, i) => {
+        const sc = scorecard[i] || {};
+        let ydsClass = teeColorClass ? teeColorClass : '';
+        function dtd(val, cls = "") { return `<td class="data-col${cls ? ' ' + cls : ''}">${val ?? ''}</td>`; }
+
+        let scoreCell = '';
+        if (sc.score) {
+          if (sc.score < h.par) scoreCell = `<td class="data-col"><div class="birdie">${sc.score}</div></td>`;
+          else if (sc.score > h.par) scoreCell = `<td class="data-col bogey">${sc.score}</td>`;
+          else scoreCell = `<td class="data-col">${sc.score}</td>`;
+        } else scoreCell = dtd('');
+
+        let puttsCell = '';
+        if (sc.putts) {
+          if (Number(sc.putts) === 1) puttsCell = dtd(sc.putts, "putt-azul");
+          else if (Number(sc.putts) === 3) puttsCell = dtd(sc.putts, "putt-rojo");
+          else puttsCell = dtd(sc.putts);
+        } else puttsCell = dtd('');
+
+        let ddCell = '';
+        if (h.par != 3) {
+          if (sc.dd) {
+            if (Number(sc.dd) === ddStats.longest) ddCell = dtd(sc.dd, "dd-azul");
+            else if (Number(sc.dd) === ddStats.shortest) ddCell = dtd(sc.dd, "dd-rojo");
+            else ddCell = dtd(sc.dd);
+          } else ddCell = dtd('');
+        } else {
+          ddCell = dtd('');
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="hole-col">${h.hole}</td>
+            <td class="par-col"><b>${h.par}</b></td>
+            <td class="yds-col ${ydsClass}"><b>${h.yds}</b></td>
+            <td class="vent-col">${h.ventaja || ''}</td>
+            ${scoreCell}
+            ${puttsCell}
+            ${ddCell}
+            ${dtd(sc.ddtype)}
+            ${dtd(sc.dist2pin)}
+            ${dtd(sc.firstputt)}
+            <td class="fir-check">${sc.ddtype === 'FIR' ? '✓' : ''}</td>
+            <td class="gir-check">${calcGIR(h, sc) ? '✓' : ''}</td>
+          </tr>
+        `;
+      });
+      updateTotals();
+    }
+
+    function showHole() {
+      const h = holes[idx];
+      boxHoleNum.textContent = h.hole;
+      infoPar.textContent = h.par;
+      infoYds.textContent = h.yds;
+      infoVent.textContent = h.ventaja || '';
+      infoOverpar.textContent = getOverPar(idx);
+
+      if (h.par == 3) {
+        ddGroup.classList.add('hide');
+        ddtypeGroup.classList.add('hide');
+        dist2pinGroup.classList.add('hide');
+        ddTh.style.visibility = 'hidden';
+      } else {
+        ddGroup.classList.remove('hide');
+        ddtypeGroup.classList.remove('hide');
+        dist2pinGroup.classList.remove('hide');
+        ddTh.style.visibility = 'visible';
+      }
+
+      ['score','putts','dd','ddtype','dist2pin','firstputt'].forEach(id => {
+        const el = document.getElementById(id);
+        if (scorecard[idx] && typeof scorecard[idx][id] !== 'undefined') {
+          el.value = scorecard[idx][id];
+        } else {
+          el.value = '';
+        }
+      });
+      formMsg.textContent = '';
+      formMsg.className = '';
+
+      // Mostrar "Guardar tarjeta" solo en el último hoyo
+      saveBtn.style.display = (idx === holes.length - 1) ? 'block' : 'none';
+      prevBtn.disabled = (idx === 0);
+
+      // Iniciar audio de fondo si está pausado
+      if (bgAudio && bgAudio.paused) {
+        bgAudio.play().catch(() => {
+          console.warn('Audio de fondo requiere interacción del usuario para reproducir.');
+        });
+      }
+
+      setTimeout(() => {
+        document.getElementById('score').focus();
+      }, 20);
+    }
+
+    ['score','putts','dd','ddtype','dist2pin','firstputt'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const vals = {};
+        ['score','putts','dd','ddtype','dist2pin','firstputt'].forEach(fid => {
+          vals[fid] = document.getElementById(fid).value;
+        });
+        scorecard[idx] = vals;
+        renderScorecard();
+        infoOverpar.textContent = getOverPar(idx);
+      });
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (clickAudio) {
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(() => {
+          console.warn('Audio de clic necesita interacción.');
+        });
+      }
+      if (idx < holes.length - 1) {
+        idx++;
+        showHole();
+      }
+    });
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (clickAudio) {
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(() => {
+          console.warn('Audio de clic necesita interacción.');
+        });
+      }
+      if (idx > 0) {
+        idx--;
+        showHole();
+      }
+    });
+
+    function calcGIR(h, sc) {
+      if (!sc.score || !sc.putts) return false;
+      const approach = sc.score - sc.putts;
+      if (h.par === 3) return approach <= 1;
+      if (h.par === 4) return approach <= 2;
+      if (h.par === 5) return approach <= 3;
+      return false;
+    }
+
+    function updateTotals() {
+      let scoreSum = 0, puttsSum = 0, ddSum = 0;
+      let firCount = 0, firHoles = 0;
+      let girCount = 0, girHoles = 0;
+      let dist2pinSum = 0, dist2pinCount = 0;
+      let firstputtSum = 0, firstputtCount = 0;
+      let ddCount = 0;
+
+      scorecard.forEach((sc, i) => {
+        const h = holes[i];
+        if (sc) {
+          // Sumas básicas
+          if (sc.score) scoreSum += Number(sc.score);
+          if (sc.putts) puttsSum += Number(sc.putts);
+          
+          // FIR - solo en hoyos Par 4 y Par 5
+          if (h.par != 3) {
+            if (sc.ddtype) {
+              firHoles++;
+              if (sc.ddtype === 'FIR') firCount++;
+            }
+          }
+
+          // GIR
+          if (sc.score && sc.putts) {
+            girHoles++;
+            if (calcGIR(h, sc)) girCount++;
+          }
+          
+          // DD
+          if (h.par != 3 && sc.dd) {
+            const ddVal = Number(sc.dd);
+            if (!isNaN(ddVal)) {
+              ddSum += ddVal;
+              ddCount++;
+            }
+          }
+          
+          // Dist2Pin
+          if (sc.dist2pin) {
+            const distVal = Number(sc.dist2pin);
+            if (!isNaN(distVal)) {
+              dist2pinSum += distVal;
+              dist2pinCount++;
+            }
+          }
+          
+          // 1er Putt
+          if (sc.firstputt) {
+            const puttVal = Number(sc.firstputt);
+            if (!isNaN(puttVal)) {
+              firstputtSum += puttVal;
+              firstputtCount++;
+            }
+          }
+        }
+      });
+
+      // Actualizar totales
+      document.getElementById('sum-score').textContent = scoreSum > 0 ? scoreSum : '';
+      document.getElementById('sum-putts').textContent = puttsSum > 0 ? puttsSum : '';
+      document.getElementById('sum-dd').textContent = ddSum > 0 ? ddSum : '';
+      document.getElementById('fir-count').textContent = `${firCount}/${firHoles}`;
+      document.getElementById('gir-count').textContent = `${girCount}/${girHoles}`;
+
+      // Calcular promedios
+      const firPercentage = firHoles > 0 ? (firCount / firHoles * 100).toFixed(1) + '%' : 'N/A';
+      const girPercentage = girHoles > 0 ? (girCount / girHoles * 100).toFixed(1) + '%' : 'N/A';
+      const avgDD = ddCount > 0 ? Math.round(ddSum / ddCount) : 'N/A';
+      const avgDist2pin = dist2pinCount > 0 ? Math.round(dist2pinSum / dist2pinCount) : 'N/A';
+      const avgFirstputt = firstputtCount > 0 ? Math.round(firstputtSum / firstputtCount) : 'N/A';
+
+      // Actualizar promedios
+      document.getElementById('fir-percentage').textContent = firPercentage;
+      document.getElementById('gir-percentage').textContent = girPercentage;
+      document.getElementById('avg-dd').textContent = avgDD;
+      document.getElementById('avg-dist2pin').textContent = avgDist2pin;
+      document.getElementById('avg-firstputt').textContent = avgFirstputt;
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserUid = user.uid;
+        if (idx === holes.length - 1) {
+          saveBtn.style.display = 'block';
+        }
+      } else {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(err => {
+          alert("Error al iniciar sesión: " + err.message);
+        });
+      }
+    });
+
+    async function uploadScorecardToFirestore() {
+      if (!currentUserUid) {
+        showMessage("Debes iniciar sesión para guardar tu tarjeta.", "error");
+        return;
+      }
+
+      let totalScore = 0, totalPutts = 0, totalParSum = 0;
+      scorecard.forEach((sc, i) => {
+        if (sc && sc.score) totalScore += Number(sc.score);
+        if (sc && sc.putts) totalPutts += Number(sc.putts);
+        if (holes[i] && holes[i].par) totalParSum += Number(holes[i].par);
+      });
+      const toPar = totalScore - totalParSum;
+
+      const roundId = Date.now().toString();
+      const batch = writeBatch(db);
+
+      const summaryRef = doc(db, "users", currentUserUid, "scorecards", roundId);
+      batch.set(summaryRef, {
+        userId: currentUserUid,
+        playerId: round.PLAYERSNAME || currentUserUid,
+        roundId: roundId,
+        date: round.date ? new Date(round.date) : serverTimestamp(),
+        course: round.course || '',
+        tee: round.tee || '',
+        totalScore: totalScore,
+        totalPutts: totalPutts,
+        parTotal: totalParSum,
+        toPar: toPar,
+        createdAt: serverTimestamp()
+      });
+
+      holes.forEach((h, i) => {
+        const sc = scorecard[i] || {};
+        const holeNumber = h.hole.toString();
+        const holeRef = doc(db, "users", currentUserUid, "scorecards", roundId, "holes", holeNumber);
+        batch.set(holeRef, {
+          holeNumber: h.hole,
+          par: h.par,
+          yds: h.yds,
+          handicap: h.ventaja,
+          score: sc.score ? Number(sc.score) : null,
+          putts: sc.putts ? Number(sc.putts) : null,
+          drivingDistance: sc.dd ? Number(sc.dd) : null,
+          ddType: sc.ddtype || null,
+          dist2pin: sc.dist2pin ? Number(sc.dist2pin) : null,
+          firstPuttDistance: sc.firstputt ? Number(sc.firstputt) : null,
+          timestamp: round.date ? new Date(round.date) : serverTimestamp()
+        });
+      });
+
+      try {
+        await batch.commit();
+        showMessage("✅ Tarjeta guardada con éxito! Redirigiendo...", "success");
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1500);
+      } catch (err) {
+        console.error("Error guardando en Firestore:", err);
+        showMessage("❌ Error al guardar la tarjeta. Revisa la consola.", "error");
+      }
+    }
+
+    function showMessage(message, type) {
+      formMsg.textContent = message;
+      formMsg.className = type === 'success' ? 'success-msg' : 'error-msg';
+    }
+
+    saveBtn.addEventListener('click', uploadScorecardToFirestore);
+
+    // Inicializa al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      if (bgAudio) {
+        bgAudio.play().catch(() => {
+          console.warn('Audio de fondo requiere interacción del usuario para reproducir.');
+        });
+      }
+      renderScorecard();
+      showHole();
+    });
+  </script>
+</body>
+</html>
