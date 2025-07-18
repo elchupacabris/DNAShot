@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Strokes Gained Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #f0f9f1;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+    }
+    h1 {
+      font-family: 'Rock Salt', cursive;
+      color: #2b5c2e;
+    }
+    #selectors {
+      margin: 20px;
+    }
+    select {
+      padding: 6px;
+      margin: 5px;
+    }
+    canvas {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>Strokes Gained</h1>
+  <div id="selectors">
+    <label>Campo (CC):</label>
+    <select id="ccSelect">
+      <option value="ARRAYANES">ARRAYANES</option>
+      <option value="FONTO">FONTO</option>
+      <option value="LLANOGRANDE">LLANOGRANDE</option>
+    </select>
+
+    <label>Jugador (UID):</label>
+    <select id="uidSelect">
+      <option value="38343c45-5bf0-427f-a102-8853c822411d">SANTIAGO</option>
+      <option value="UID2">ML</option>
+      <option value="UID3">JM</option>
+    </select>
+  </div>
+
+  <canvas id="sgChart" width="400" height="400"></canvas>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDT8uclSbsMCGDjxohUe7x1jwnq4zInr6w",
+      authDomain: "dnashot-b2fa0.firebaseapp.com",
+      projectId: "dnashot-b2fa0",
+      storageBucket: "dnashot-b2fa0.appspot.com",
+      messagingSenderId: "1054670174023",
+      appId: "1:1054670174023:web:74cf1fdfb7a3518638fe62",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const ctx = document.getElementById('sgChart').getContext('2d');
+    let chart;
+
+    async function loadSGData(cc, uid) {
+      const generalRef = db.collection("strokesGained").doc("GENERAL");
+      const ccRef = db.collection("strokesGained").doc("CC").collection(cc).doc("sg");
+      const uidRef = db.collection("strokesGained").doc("UID").collection(uid).doc("sg");
+
+      const [generalSnap, ccSnap, uidSnap] = await Promise.all([
+        generalRef.get(),
+        ccRef.get(),
+        uidRef.get()
+      ]);
+
+      const general = generalSnap.exists ? generalSnap.data() : {};
+      const ccData = ccSnap.exists ? ccSnap.data() : {};
+      const uidData = uidSnap.exists ? uidSnap.data() : {};
+
+      return {
+        general: general,
+        cc: ccData,
+        uid: uidData
+      };
+    }
+
+    function updateChart(data) {
+      const labels = ["SG OTT", "SG APP", "SG PUTT", "SG TOTAL"];
+      const generalData = labels.map(l => data.general[l] ?? 0);
+      const ccData = labels.map(l => data.cc[l] ?? 0);
+      const uidData = labels.map(l => data.uid[l] ?? 0);
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "GENERAL",
+              data: generalData,
+              backgroundColor: "rgba(34,197,94,0.2)",
+              borderColor: "rgba(34,197,94,1)",
+              borderWidth: 2
+            },
+            {
+              label: "CAMPO",
+              data: ccData,
+              backgroundColor: "rgba(59,130,246,0.2)",
+              borderColor: "rgba(59,130,246,1)",
+              borderWidth: 2
+            },
+            {
+              label: "JUGADOR",
+              data: uidData,
+              backgroundColor: "rgba(234,88,12,0.2)",
+              borderColor: "rgba(234,88,12,1)",
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          elements: {
+            line: { tension: 0.3 }
+          },
+          scales: {
+            r: {
+              angleLines: { display: true },
+              suggestedMin: -3,
+              suggestedMax: 3
+            }
+          }
+        }
+      });
+    }
+
+    async function refresh() {
+      const cc = document.getElementById("ccSelect").value;
+      const uid = document.getElementById("uidSelect").value;
+      const sgData = await loadSGData(cc, uid);
+      updateChart(sgData);
+    }
+
+    document.getElementById("ccSelect").addEventListener("change", refresh);
+    document.getElementById("uidSelect").addEventListener("change", refresh);
+
+    window.onload = refresh;
+  </script>
+</body>
+</html>
